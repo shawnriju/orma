@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -29,9 +30,9 @@ export default function Home() {
               Pricing
             </a>
           </div>
-          <button className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-label-md text-label-md active:scale-95 transition-transform cursor-pointer">
+          <Link href="/notes/renaissance-architecture" className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-label-md text-label-md active:scale-95 transition-transform cursor-pointer">
             Start Learning
-          </button>
+          </Link>
         </nav>
       </header>
 
@@ -45,9 +46,9 @@ export default function Home() {
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
               Write notes, and we’ll handle the rest. No complex setups, just you and your curiosity.
             </p>
-            <button className="bg-primary-container text-on-primary-container px-10 py-4 rounded-xl font-label-md text-[18px] hover:opacity-90 transition-all active:scale-95 cursor-pointer">
+            <Link href="/notes/renaissance-architecture" className="inline-block bg-primary-container text-on-primary-container px-10 py-4 rounded-xl font-label-md text-[18px] hover:opacity-90 transition-all active:scale-95 cursor-pointer">
               Start Learning
-            </button>
+            </Link>
           </div>
         </section>
 
@@ -77,9 +78,9 @@ export default function Home() {
               <p className="font-body-md text-body-lg text-on-surface-variant mb-10">
                 We've curated 5 key concepts from your notes on "Renaissance Art" to reinforce today. It only takes 3 minutes.
               </p>
-              <button className="w-full bg-primary-container text-on-primary-container font-label-md text-lg py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 cursor-pointer">
+              <Link href="/notes/renaissance-architecture" className="inline-block w-full text-center bg-primary-container text-on-primary-container font-label-md text-lg py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 cursor-pointer">
                 Begin Session
-              </button>
+              </Link>
             </div>
             {/* Decorative background elements */}
             <div className="absolute -left-20 -bottom-20 opacity-30 pointer-events-none">

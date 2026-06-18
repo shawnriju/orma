@@ -19,7 +19,7 @@ notes.get('/', async (c) => {
 
   let query = supabase
     .from('notes')
-    .select('id, title, notebook_id, word_count, updated_at')
+    .select('id, title, notebook_id, content, word_count, updated_at')
     .eq('user_id', userId)
     .order('updated_at', { ascending: false })
 
