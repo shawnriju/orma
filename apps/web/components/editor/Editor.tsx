@@ -40,6 +40,7 @@ export default function Editor({ noteId, initialTitle, initialContent, initialTa
 
   // Tiptap setup
   const editor = useEditor({
+    immediatelyRender: true,
     extensions: [
       StarterKit,
       Placeholder.configure({
