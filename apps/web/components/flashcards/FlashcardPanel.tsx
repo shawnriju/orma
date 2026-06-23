@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Sparkles, Trash2, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { api } from '../../lib/api'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface FlashcardPanelProps {
   noteId: string
@@ -16,6 +16,7 @@ interface DraftCard {
 }
 
 export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProps) {
+  const queryClient = useQueryClient()
   const [draftCards, setDraftCards] = useState<DraftCard[]>([])
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -45,6 +46,7 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
       setSuccessMsg('Flashcards saved successfully!')
       setDraftCards([])
       setErrorMsg('')
+      queryClient.invalidateQueries({ queryKey: ['note-stats', noteId] })
     },
     onError: (err: any) => {
       setErrorMsg(err.message || 'Failed to save flashcards.')

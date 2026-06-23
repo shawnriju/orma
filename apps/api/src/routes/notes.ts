@@ -55,6 +55,52 @@ notes.get('/:id', async (c) => {
   return c.json(data)
 })
 
+// 2b. GET /:id/flashcard-stats - Get total and due flashcard count for a note
+notes.get('/:id/flashcard-stats', async (c) => {
+  const userId = c.get('userId')
+  const noteId = c.req.param('id')
+
+  // Enforce ownership: Check if note exists and belongs to user
+  const { data: note, error: noteError } = await supabase
+    .from('notes')
+    .select('id')
+    .eq('id', noteId)
+    .eq('user_id', userId)
+    .single()
+
+  if (noteError || !note) {
+    return c.json({ error: 'Note not found or unauthorized' }, 404)
+  }
+
+  // Count total flashcards for this note
+  const { count: totalCount, error: totalError } = await supabase
+    .from('flashcards')
+    .select('*', { count: 'exact', head: true })
+    .eq('note_id', noteId)
+    .eq('user_id', userId)
+
+  if (totalError) {
+    return c.json({ error: totalError.message }, 500)
+  }
+
+  // Count due flashcards for this note
+  const { count: dueCount, error: dueError } = await supabase
+    .from('flashcards')
+    .select('*', { count: 'exact', head: true })
+    .eq('note_id', noteId)
+    .eq('user_id', userId)
+    .lte('next_review_at', new Date().toISOString())
+
+  if (dueError) {
+    return c.json({ error: dueError.message }, 500)
+  }
+
+  return c.json({
+    totalCount: totalCount ?? 0,
+    dueCount: dueCount ?? 0,
+  })
+})
+
 // Validation Schema for creating a note
 const createSchema = z.object({
   notebook_id: z.string().uuid(),

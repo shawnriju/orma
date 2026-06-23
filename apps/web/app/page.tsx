@@ -30,7 +30,7 @@ export default function Home() {
               Pricing
             </a>
           </div>
-          <Link href="/notes/renaissance-architecture" className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-label-md text-label-md active:scale-95 transition-transform cursor-pointer">
+          <Link href="/notes" className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-label-md text-label-md active:scale-95 transition-transform cursor-pointer">
             Start Learning
           </Link>
         </nav>
@@ -46,7 +46,7 @@ export default function Home() {
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
               Write notes, and we’ll handle the rest. No complex setups, just you and your curiosity.
             </p>
-            <Link href="/notes/renaissance-architecture" className="inline-block bg-primary-container text-on-primary-container px-10 py-4 rounded-xl font-label-md text-[18px] hover:opacity-90 transition-all active:scale-95 cursor-pointer">
+            <Link href="/notes" className="inline-block bg-primary-container text-on-primary-container px-10 py-4 rounded-xl font-label-md text-[18px] hover:opacity-90 transition-all active:scale-95 cursor-pointer">
               Start Learning
             </Link>
           </div>
@@ -78,7 +78,7 @@ export default function Home() {
               <p className="font-body-md text-body-lg text-on-surface-variant mb-10">
                 We've curated 5 key concepts from your notes on "Renaissance Art" to reinforce today. It only takes 3 minutes.
               </p>
-              <Link href="/notes/renaissance-architecture" className="inline-block w-full text-center bg-primary-container text-on-primary-container font-label-md text-lg py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 cursor-pointer">
+              <Link href="/notes" className="inline-block w-full text-center bg-primary-container text-on-primary-container font-label-md text-lg py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 cursor-pointer">
                 Begin Session
               </Link>
             </div>

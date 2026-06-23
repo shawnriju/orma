@@ -12,6 +12,29 @@ type Env = {
 
 const flashcards = new Hono<Env>()
 
+// 0. GET / - List all flashcards for the authenticated user (optionally filtered by note_id)
+flashcards.get('/', async (c) => {
+  const userId = c.get('userId')
+  const noteId = c.req.query('note_id')
+
+  let query = supabase
+    .from('flashcards')
+    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, created_at, notes ( title )')
+    .eq('user_id', userId)
+
+  if (noteId) {
+    query = query.eq('note_id', noteId)
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false })
+
+  if (error) {
+    return c.json({ error: error.message }, 500)
+  }
+
+  return c.json(data)
+})
+
 // Helper: extract plain text from ProseMirror JSON document
 function extractTextFromProseMirror(doc: any): string {
   if (!doc) return ''

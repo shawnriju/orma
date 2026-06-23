@@ -13,13 +13,19 @@ const study = new Hono<Env>()
 
 study.get('/due', async (c) => {
   const userId = c.get('userId')
+  const noteId = c.req.query('note_id')
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('flashcards')
-    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, created_at')
+    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, created_at, notes ( title )')
     .eq('user_id', userId)
     .lte('next_review_at', new Date().toISOString())
-    .order('next_review_at', { ascending: true })
+
+  if (noteId) {
+    query = query.eq('note_id', noteId)
+  }
+
+  const { data, error } = await query.order('next_review_at', { ascending: true })
 
   if (error) {
     return c.json({ error: error.message }, 500)

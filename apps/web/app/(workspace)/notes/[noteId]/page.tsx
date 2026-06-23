@@ -21,6 +21,13 @@ export default function NotePage() {
     queryFn: () => api.notes.get(noteId)
   })
 
+  // Fetch flashcard stats for this note
+  const { data: stats } = useQuery({
+    queryKey: ['note-stats', noteId],
+    queryFn: () => api.notes.flashcardStats(noteId),
+    enabled: !!noteId,
+  })
+
   // Update note mutation
   const updateNoteMutation = useMutation({
     mutationFn: (data: { title?: string; content?: any; word_count?: number }) => 
@@ -99,13 +106,44 @@ export default function NotePage() {
 
       {/* Main Workspace Layout (Editor + Flashcards Sidebar) */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Middle Editor */}
-        <Editor 
-          noteId={noteId}
-          initialTitle={note?.title || 'Untitled Note'}
-          initialContent={note?.content}
-          onSave={handleSave}
-        />
+        {/* Middle Editor & Stats Footer Wrapper */}
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <Editor 
+              noteId={noteId}
+              initialTitle={note?.title || 'Untitled Note'}
+              initialContent={note?.content}
+              onSave={handleSave}
+            />
+          </div>
+          
+          {/* Note Study Footer (Coral Box) */}
+          {stats && stats.totalCount > 0 && (
+            <footer className="bg-[#fff8f5] border-t border-[#dac1b9]/30 px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-[#d67d5c]" />
+                <span className="text-sm font-semibold text-[#87736c]">
+                  <strong className="text-[#1e1b18]">{stats.totalCount}</strong> cards from this note ·{' '}
+                  <strong className="text-[#94492c]">{stats.dueCount}</strong> due today
+                </span>
+              </div>
+              <div>
+                {stats.dueCount > 0 ? (
+                  <Link
+                    href={`/study?noteId=${noteId}`}
+                    className="px-4 py-2 bg-[#d67d5c] hover:bg-[#94492c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                  >
+                    <span>Study Now</span>
+                  </Link>
+                ) : (
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#506351] bg-[#d3e8d1] px-3 py-1.5 rounded-xl border border-[#dac1b9]/20">
+                    All Caught Up
+                  </span>
+                )}
+              </div>
+            </footer>
+          )}
+        </div>
 
         {/* Right Magic Study Panel */}
         <FlashcardPanel noteId={noteId} wordCount={note?.word_count ?? 0} />

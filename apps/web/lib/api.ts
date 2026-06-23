@@ -61,6 +61,9 @@ export interface Flashcard {
   interval_days?: number
   ease_factor?: number
   created_at: string
+  notes?: {
+    title: string
+  } | null
 }
 
 export const api = {
@@ -94,8 +97,12 @@ export const api = {
       apiCall<{ success: boolean }>(`/api/v1/notes/${id}`, {
         method: 'DELETE',
       }),
+    flashcardStats: (id: string) =>
+      apiCall<{ totalCount: number; dueCount: number }>(`/api/v1/notes/${id}/flashcard-stats`),
   },
   flashcards: {
+    list: (noteId?: string) =>
+      apiCall<Flashcard[]>(`/api/v1/flashcards${noteId ? `?note_id=${noteId}` : ''}`),
     generate: (noteId: string, selectedText?: string) =>
       apiCall<Array<{ question: string; answer: string }>>('/api/v1/flashcards/generate', {
         method: 'POST',
@@ -108,7 +115,7 @@ export const api = {
       }),
   },
   study: {
-    due: () => apiCall<Flashcard[]>('/api/v1/study/due'),
+    due: (noteId?: string) => apiCall<Flashcard[]>(`/api/v1/study/due${noteId ? `?note_id=${noteId}` : ''}`),
     review: (flashcardId: string, correct: boolean) =>
       apiCall<Flashcard>('/api/v1/study/review', {
         method: 'POST',
