@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query'
 
 interface FlashcardPanelProps {
   noteId: string
+  wordCount: number
 }
 
 interface DraftCard {
@@ -14,7 +15,7 @@ interface DraftCard {
   answer: string
 }
 
-export default function FlashcardPanel({ noteId }: FlashcardPanelProps) {
+export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProps) {
   const [draftCards, setDraftCards] = useState<DraftCard[]>([])
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
@@ -23,9 +24,14 @@ export default function FlashcardPanel({ noteId }: FlashcardPanelProps) {
   const generateMutation = useMutation({
     mutationFn: () => api.flashcards.generate(noteId),
     onSuccess: (cards) => {
-      setDraftCards(cards)
-      setErrorMsg('')
-      setSuccessMsg('')
+      if (!cards || cards.length === 0) {
+        setErrorMsg('The AI could not extract any educational facts from this note. Please add more study material.')
+        setDraftCards([])
+      } else {
+        setDraftCards(cards)
+        setErrorMsg('')
+        setSuccessMsg('')
+      }
     },
     onError: (err: any) => {
       setErrorMsg(err.message || 'Failed to generate flashcards.')
@@ -88,24 +94,38 @@ export default function FlashcardPanel({ noteId }: FlashcardPanelProps) {
         )}
 
         {draftCards.length === 0 && !generateMutation.isPending && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-4 gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#fff] border border-[#dac1b9] flex items-center justify-center shadow-sm text-[#87736c]">
-              <Sparkles className="w-6 h-6" />
+          wordCount < 20 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-4 gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#fff] border border-[#dac1b9] flex items-center justify-center shadow-sm text-[#87736c]">
+                <AlertCircle className="w-6 h-6 text-[#94492c]" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-[#1e1b18]">Not Enough Context</p>
+                <p className="text-xs text-[#87736c] mt-1 leading-relaxed">
+                  Your note needs at least 20 words to generate flashcards. Please write a bit more to give the AI context.
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-semibold text-sm text-[#1e1b18]">No Study Cards Yet</p>
-              <p className="text-xs text-[#87736c] mt-1 leading-relaxed">
-                Generate study cards automatically using AI based on your current note.
-              </p>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-4 gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#fff] border border-[#dac1b9] flex items-center justify-center shadow-sm text-[#87736c]">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-[#1e1b18]">No Study Cards Yet</p>
+                <p className="text-xs text-[#87736c] mt-1 leading-relaxed">
+                  Generate study cards automatically using AI based on your current note.
+                </p>
+              </div>
+              <button
+                onClick={() => generateMutation.mutate()}
+                className="px-4 py-2.5 bg-[#d67d5c] hover:bg-[#94492c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Generate Flashcards</span>
+              </button>
             </div>
-            <button
-              onClick={() => generateMutation.mutate()}
-              className="px-4 py-2.5 bg-[#d67d5c] hover:bg-[#94492c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Generate Flashcards</span>
-            </button>
-          </div>
+          )
         )}
 
         {generateMutation.isPending && (

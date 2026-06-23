@@ -11,22 +11,17 @@ interface EditorProps {
   noteId: string
   initialTitle: string
   initialContent: any
-  initialTags?: string[]
-  onSave: (data: { title?: string; content?: any; tags?: string[]; word_count?: number }) => Promise<void>
+  onSave: (data: { title?: string; content?: any; word_count?: number }) => Promise<void>
 }
 
-export default function Editor({ noteId, initialTitle, initialContent, initialTags = [], onSave }: EditorProps) {
+export default function Editor({ noteId, initialTitle, initialContent, onSave }: EditorProps) {
   const [title, setTitle] = useState(initialTitle)
-  const [tags, setTags] = useState<string[]>(initialTags)
-  const [isAddingTag, setIsAddingTag] = useState(false)
-  const [newTagVal, setNewTagVal] = useState('')
   const { setSaveState, saveState } = useEditorStore()
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Sync state with props ONLY when switching notes
   useEffect(() => {
     setTitle(initialTitle)
-    setTags(initialTags || [])
   }, [noteId])
 
   // Clear save timeout on unmount
@@ -51,7 +46,7 @@ export default function Editor({ noteId, initialTitle, initialContent, initialTa
     ],
     content: initialContent || '',
     onUpdate: ({ editor }) => {
-      triggerSave(title, editor.getJSON(), tags)
+      triggerSave(title, editor.getJSON())
     }
   })
 
@@ -63,7 +58,7 @@ export default function Editor({ noteId, initialTitle, initialContent, initialTa
   }, [noteId, initialContent, editor])
 
   // Debounced auto-save logic
-  const triggerSave = (newTitle: string, newContent: any, newTags: string[]) => {
+  const triggerSave = (newTitle: string, newContent: any) => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
@@ -77,7 +72,7 @@ export default function Editor({ noteId, initialTitle, initialContent, initialTa
           const text = editor.getText() || ''
           words = text.split(/\s+/).filter(Boolean).length
         }
-        await onSave({ title: newTitle, content: newContent, tags: newTags, word_count: words })
+        await onSave({ title: newTitle, content: newContent, word_count: words })
         setSaveState('saved')
         setTimeout(() => setSaveState('idle'), 2000)
       } catch (e) {
@@ -90,27 +85,7 @@ export default function Editor({ noteId, initialTitle, initialContent, initialTa
     const val = e.target.value
     setTitle(val)
     if (editor) {
-      triggerSave(val, editor.getJSON(), tags)
-    }
-  }
-
-  const handleAddTag = () => {
-    if (newTagVal.trim() && !tags.includes(newTagVal.trim())) {
-      const updated = [...tags, newTagVal.trim()]
-      setTags(updated)
-      setNewTagVal('')
-      setIsAddingTag(false)
-      if (editor) {
-        triggerSave(title, editor.getJSON(), updated)
-      }
-    }
-  }
-
-  const handleRemoveTag = (tag: string) => {
-    const updated = tags.filter(t => t !== tag)
-    setTags(updated)
-    if (editor) {
-      triggerSave(title, editor.getJSON(), updated)
+      triggerSave(val, editor.getJSON())
     }
   }
 
@@ -164,43 +139,6 @@ export default function Editor({ noteId, initialTitle, initialContent, initialTa
         placeholder="Untitled Note"
         className="w-full text-4xl md:text-5xl font-bold font-serif text-[#1e1b18] placeholder-[#dac1b9] outline-none border-none mb-6 bg-transparent"
       />
-
-      {/* Tags Row */}
-      <div className="flex flex-wrap items-center gap-2 mb-8">
-        {tags.map((tag) => (
-          <span 
-            key={tag}
-            className="flex items-center gap-1.5 px-3 py-1 bg-[#f5ece7] text-[#54433d] rounded-full text-xs font-semibold hover:bg-[#ffdad6] hover:text-[#ba1a1a] transition-all cursor-pointer select-none"
-            onClick={() => handleRemoveTag(tag)}
-          >
-            <span>#{tag}</span>
-          </span>
-        ))}
-        {isAddingTag ? (
-          <div className="flex items-center gap-1 bg-[#fff8f5] border border-[#dac1b9] rounded-full px-2 py-0.5">
-            <input 
-              type="text"
-              autoFocus
-              value={newTagVal}
-              onChange={(e) => setNewTagVal(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
-              placeholder="Tag..."
-              className="text-xs bg-transparent outline-none w-16 text-[#54433d]"
-            />
-            <button onClick={handleAddTag} className="text-[#94492c] hover:text-[#d67d5c]">
-              <Check className="w-3 h-3" />
-            </button>
-          </div>
-        ) : (
-          <button 
-            onClick={() => setIsAddingTag(true)}
-            className="flex items-center gap-1 px-3 py-1 bg-[#fff] border border-[#dac1b9] text-[#87736c] hover:text-[#94492c] hover:border-[#94492c] rounded-full text-xs font-semibold transition-all select-none"
-          >
-            <Plus className="w-3 h-3" />
-            <span>Add Tag</span>
-          </button>
-        )}
-      </div>
 
       {/* Editor Content */}
       <div 

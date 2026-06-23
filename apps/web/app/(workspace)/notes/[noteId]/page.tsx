@@ -23,7 +23,7 @@ export default function NotePage() {
 
   // Update note mutation
   const updateNoteMutation = useMutation({
-    mutationFn: (data: { title?: string; content?: any; tags?: string[]; word_count?: number }) => 
+    mutationFn: (data: { title?: string; content?: any; word_count?: number }) => 
       api.notes.update(noteId, data),
     onSuccess: (updatedNote) => {
       // Direct cache update to prevent flashing during refetch
@@ -57,7 +57,7 @@ export default function NotePage() {
     )
   }
 
-  const handleSave = async (data: { title?: string; content?: any; tags?: string[]; word_count?: number }) => {
+  const handleSave = async (data: { title?: string; content?: any; word_count?: number }) => {
     await updateNoteMutation.mutateAsync(data)
   }
 
@@ -93,12 +93,11 @@ export default function NotePage() {
           noteId={noteId}
           initialTitle={note?.title || 'Untitled Note'}
           initialContent={note?.content}
-          initialTags={note?.tags || []}
           onSave={handleSave}
         />
 
         {/* Right Magic Study Panel */}
-        <FlashcardPanel noteId={noteId} />
+        <FlashcardPanel noteId={noteId} wordCount={note?.word_count ?? 0} />
       </div>
     </div>
   )
