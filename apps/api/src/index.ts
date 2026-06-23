@@ -12,6 +12,7 @@ import { authMiddleware } from './middleware/auth.js'
 import notes from './routes/notes.js'
 import notebooks from './routes/notebooks.js'
 import flashcards from './routes/flashcards.js'
+import study from './routes/study.js'
 
 // import study from './routes/study.js'
 // import backup from './routes/backup.js'
@@ -35,7 +36,7 @@ app.use('/api/v1/*', authMiddleware)
 app.route('/api/v1/notebooks', notebooks)
 app.route('/api/v1/notes', notes)
 app.route('/api/v1/flashcards', flashcards)
-// app.route('/api/v1/study', study)
+app.route('/api/v1/study', study)
 // app.route('/api/v1/backup', backup)
 
 export default app

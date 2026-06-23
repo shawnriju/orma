@@ -57,6 +57,9 @@ export interface Flashcard {
   note_id: string
   question: string
   answer: string
+  next_review_at?: string
+  interval_days?: number
+  ease_factor?: number
   created_at: string
 }
 
@@ -102,6 +105,14 @@ export const api = {
       apiCall<Flashcard[]>('/api/v1/flashcards', {
         method: 'POST',
         body: JSON.stringify({ note_id: noteId, cards }),
+      }),
+  },
+  study: {
+    due: () => apiCall<Flashcard[]>('/api/v1/study/due'),
+    review: (flashcardId: string, correct: boolean) =>
+      apiCall<Flashcard>('/api/v1/study/review', {
+        method: 'POST',
+        body: JSON.stringify({ flashcard_id: flashcardId, correct }),
       }),
   },
 }

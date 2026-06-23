@@ -16,10 +16,12 @@
 
 ### 3. Editor & Data Saving Engine
 - **Tiptap Block Editor**: Configured Tiptap with debounced (2-second) saving using a `useRef` timer block to prevent overlapping network requests.
-- **Word Count & Tags**: Integrated dynamic word count calculations and tags array persistence to Supabase Postgres.
+- **Word Count**: Integrated dynamic word count calculations.
 - **Interactivity & CSS**: Added container-wide click listeners focusing the editor workspace area and defined rich text styling for `.ProseMirror` (headings, lists, blockquotes, placeholders) in `globals.css`.
 - **Card Previews**: Updated the notes listing query to select `content` columns, rendering extracted plain-text previews on note cards.
 
 ### 4. Spaced Repetition Flashcard AI (`apps/api`)
-- **OpenAI Service**: Created the OpenAI client using `gpt-4o-mini` to extract and format flashcards as structured JSON arrays.
+- **OpenAI Service**: Configured the OpenAI client using `gpt-4o-mini` with strict structured JSON schema outputs and low temperature (0.25) to prevent hallucination.
 - **API Endpoints**: Integrated `POST /api/v1/flashcards/generate` and `POST /api/v1/flashcards` to process selections/full note content, and save confirmed cards.
+- **Safety Guardrails**: Implemented automated input safety moderation checks, character size constraints (max 10,000 characters), and validation rules rejecting low-context text (under 20 words).
+- **UX Warning Feedback**: Improved the right panel sidebar to display clean descriptive feedback warnings when notes contain too little text or lack sufficient educational context.

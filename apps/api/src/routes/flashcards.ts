@@ -65,6 +65,11 @@ flashcards.post('/generate', zValidator('json', generateSchema), async (c) => {
     return c.json({ error: 'Note content is empty, cannot generate flashcards' }, 400)
   }
 
+  const wordCount = textToProcess.split(/\s+/).filter(Boolean).length
+  if (wordCount < 20) {
+    return c.json({ error: 'Not enough context to generate flashcards. Please write at least 20 words.' }, 400)
+  }
+
   try {
     const cards = await generateFlashcards(textToProcess)
     return c.json(cards)

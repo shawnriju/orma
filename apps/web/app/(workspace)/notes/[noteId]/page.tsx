@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, MoreHorizontal, User, Sparkles } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '../../../../lib/api'
+import { api, Note } from '../../../../lib/api'
 import Editor from '../../../../components/editor/Editor'
 import FlashcardPanel from '../../../../components/flashcards/FlashcardPanel'
 
@@ -26,9 +26,20 @@ export default function NotePage() {
     mutationFn: (data: { title?: string; content?: any; word_count?: number }) => 
       api.notes.update(noteId, data),
     onSuccess: (updatedNote) => {
-      // Direct cache update to prevent flashing during refetch
+      // Direct cache update to prevent flashing and avoid refetching all note lists on every autosave.
       queryClient.setQueryData(['note', noteId], updatedNote)
-      queryClient.invalidateQueries({ queryKey: ['notes'] })
+      queryClient.setQueriesData<Note[]>({ queryKey: ['notes'] }, (existingNotes) => {
+        if (!existingNotes) return existingNotes
+
+        return existingNotes.map((note) =>
+          note.id === noteId
+            ? {
+                ...note,
+                ...updatedNote,
+              }
+            : note
+        )
+      })
     }
   })
 
