@@ -25,3 +25,11 @@
 - **API Endpoints**: Integrated `POST /api/v1/flashcards/generate` and `POST /api/v1/flashcards` to process selections/full note content, and save confirmed cards.
 - **Safety Guardrails**: Implemented automated input safety moderation checks, character size constraints (max 10,000 characters), and validation rules rejecting low-context text (under 20 words).
 - **UX Warning Feedback**: Improved the right panel sidebar to display clean descriptive feedback warnings when notes contain too little text or lack sufficient educational context.
+
+### 5. Spaced Repetition Daily Review Redesign & Note Integration
+- **Interactive Flip Card Session**: Refactored the daily review page into a stateful, interactive 3D flip card session with card-navigation controls (prev/next) and results summary.
+- **Selective Note Study**: Redesigned the daily review dashboard to show a 'Study All Due' button and a list of active reviews grouped by note.
+- **Completed Reviews Revisit**: Added a completed reviews section allowing users to study fully reviewed cards again.
+- **Note Editor Footer Stats**: Embedded a footer stats bar inside the note page displaying saved and due counts with a 'Study Now' link.
+- **Route Redirections**: Replaced hardcoded landing page links with standard workspace notes routing and added exit warnings to prevent accidental study session exits.
+
