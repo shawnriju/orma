@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, MoreHorizontal, User, Sparkles, Trash2 } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, Sparkles, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, Note } from '../../../../lib/api'
 import Editor from '../../../../components/editor/Editor'
@@ -155,50 +155,44 @@ export default function NotePage() {
         </div>
       </header>
 
-      {/* Main Workspace Layout (Editor + Flashcards Sidebar) */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Middle Editor & Stats Footer Wrapper */}
-        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <Editor 
-              noteId={noteId}
-              initialTitle={note?.title || 'Untitled Note'}
-              initialContent={note?.content}
-              onSave={handleSave}
-            />
-          </div>
-          
-          {/* Note Study Footer (Coral Box) */}
-          {stats && stats.totalCount > 0 && (
-            <footer className="bg-[#fff8f5] border-t border-[#dac1b9]/30 px-6 py-4 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-[#d67d5c]" />
-                <span className="text-sm font-semibold text-[#87736c]">
-                  <strong className="text-[#1e1b18]">{stats.totalCount}</strong> cards from this note ·{' '}
-                  <strong className="text-[#94492c]">{stats.dueCount}</strong> due today
-                </span>
-              </div>
-              <div>
-                {stats.dueCount > 0 ? (
-                  <Link
-                    href={`/study?noteId=${noteId}`}
-                    className="px-4 py-2 bg-[#d67d5c] hover:bg-[#94492c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
-                  >
-                    <span>Study Now</span>
-                  </Link>
-                ) : (
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#506351] bg-[#d3e8d1] px-3 py-1.5 rounded-xl border border-[#dac1b9]/20">
-                    All Caught Up
-                  </span>
-                )}
-              </div>
-            </footer>
-          )}
-        </div>
+      {/* Main Workspace Layout */}
+      <div className="flex-1 min-h-0 overflow-y-auto pb-24">
+        <Editor 
+          noteId={noteId}
+          initialTitle={note?.title || 'Untitled Note'}
+          initialContent={note?.content}
+          onSave={handleSave}
+        />
 
-        {/* Right Magic Study Panel */}
-        <FlashcardPanel noteId={noteId} wordCount={note?.word_count ?? 0} />
+        {/* Note Study Footer (Coral Box) */}
+        {stats && stats.totalCount > 0 && (
+          <footer className="bg-[#fff8f5] border-t border-[#dac1b9]/30 px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-[#d67d5c]" />
+              <span className="text-sm font-semibold text-[#87736c]">
+                <strong className="text-[#1e1b18]">{stats.totalCount}</strong> cards from this note ·{' '}
+                <strong className="text-[#94492c]">{stats.dueCount}</strong> due today
+              </span>
+            </div>
+            <div>
+              {stats.dueCount > 0 ? (
+                <Link
+                  href={`/study?noteId=${noteId}`}
+                  className="px-4 py-2 bg-[#d67d5c] hover:bg-[#94492c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <span>Study Now</span>
+                </Link>
+              ) : (
+                <span className="text-xs font-bold uppercase tracking-wider text-[#506351] bg-[#d3e8d1] px-3 py-1.5 rounded-xl border border-[#dac1b9]/20">
+                  All Caught Up
+                </span>
+              )}
+            </div>
+          </footer>
+        )}
       </div>
+
+      <FlashcardPanel noteId={noteId} wordCount={note?.word_count ?? 0} />
     </div>
   )
 }

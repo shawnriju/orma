@@ -115,7 +115,7 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
   return (
     <div 
       onClick={handleWrapperClick}
-      className="flex-1 flex flex-col h-full bg-[#fff] overflow-y-auto px-8 md:px-16 py-8 cursor-text"
+      className="flex flex-col bg-[#fff] px-8 md:px-16 py-8 cursor-text"
     >
       {/* Save indicator overlay or header label */}
       <div className="flex items-center justify-between text-xs text-[#87736c] mb-6 select-none pointer-events-none">
@@ -150,7 +150,7 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
       {/* Editor Content */}
       <div 
         onClick={() => editor?.commands.focus()}
-        className="prose prose-neutral max-w-none flex-1 focus:outline-none cursor-text min-h-[400px]"
+        className="prose prose-neutral max-w-none focus:outline-none cursor-text min-h-[400px]"
       >
         <EditorContent 
           editor={editor} 
