@@ -107,7 +107,7 @@ const createSchema = z.object({
   title: z.string().optional().default('Untitled')
 })
 
-// 3. POST / - Create a new note (inserts default content = {})
+// 3. POST / - Create a new note (inserts default content = { type: 'doc', content: [] })
 notes.post('/', zValidator('json', createSchema), async (c) => {
   const userId = c.get('userId')
   const body = c.req.valid('json')
@@ -118,7 +118,7 @@ notes.post('/', zValidator('json', createSchema), async (c) => {
       user_id: userId,
       notebook_id: body.notebook_id,
       title: body.title,
-      content: {}, // Default content to empty object
+      content: { type: 'doc', content: [] }, // Default content to valid Tiptap empty doc
       word_count: 0
     })
     .select()

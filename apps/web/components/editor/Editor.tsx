@@ -33,30 +33,11 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
     }
   }, [])
 
-  // Tiptap setup
-  const editor = useEditor({
-    immediatelyRender: true,
-    extensions: [
-      StarterKit,
-      Placeholder.configure({
-        placeholder: ({ node }) => {
-          if (node.type.name === 'heading') return 'Heading...'
-          return "Start writing..."
-        }
-      })
-    ],
-    content: initialContent || '',
-    onUpdate: ({ editor }) => {
-      triggerSave(title, editor.getJSON())
-    }
-  })
-
-  // Set editor content when note changes
-  useEffect(() => {
-    if (editor && initialContent) {
-      editor.commands.setContent(initialContent)
-    }
-  }, [noteId, initialContent, editor])
+  const getSafeContent = (content: any) => {
+    if (!content) return ''
+    if (typeof content === 'object' && Object.keys(content).length === 0) return ''
+    return content
+  }
 
   // Debounced auto-save logic
   const triggerSave = (newTitle: string, newContent: any) => {
@@ -81,6 +62,31 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
       }
     }, 2000)
   }
+
+  // Tiptap setup
+  const editor = useEditor({
+    immediatelyRender: true,
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: ({ node }) => {
+          if (node.type.name === 'heading') return 'Heading...'
+          return "Start writing..."
+        }
+      })
+    ],
+    content: getSafeContent(initialContent),
+    onUpdate: ({ editor: activeEditor }) => {
+      triggerSave(title, activeEditor.getJSON())
+    }
+  })
+
+  // Set editor content when note changes
+  useEffect(() => {
+    if (editor) {
+      editor.commands.setContent(getSafeContent(initialContent))
+    }
+  }, [noteId, initialContent, editor])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value

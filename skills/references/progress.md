@@ -32,4 +32,9 @@
 - **Completed Reviews Revisit**: Added a completed reviews section allowing users to study fully reviewed cards again.
 - **Note Editor Footer Stats**: Embedded a footer stats bar inside the note page displaying saved and due counts with a 'Study Now' link.
 - **Route Redirections**: Replaced hardcoded landing page links with standard workspace notes routing and added exit warnings to prevent accidental study session exits.
-
+### 6. Notes List Actions & Editor Fixes
+- **Tiptap Empty Content Warning Fix**: Added a sanitization helper `getSafeContent` in [Editor.tsx](file:///c:/Dev/Projects/orma/apps/web/components/editor/Editor.tsx) to map empty object content (`{}`) to `''` safely. Updated the backend `POST /` notes creation route in [notes.ts](file:///c:/Dev/Projects/orma/apps/api/src/routes/notes.ts) to populate new notes with a valid default Tiptap document structure (`{ type: 'doc', content: [] }`) instead of `{}`.
+- **Card Context Actions (Rename & Delete)**: Added a stateful context menu (`MoreVertical` dropdown) inside individual cards on the Notes list dashboard ([page.tsx](file:///c:/Dev/Projects/orma/apps/web/app/\(workspace\)/notes/page.tsx)) containing:
+  - **Rename**: Prompts users to rename the note and triggers the PATCH API mutation.
+  - **Delete**: Prompts for confirmation and deletes the note record via the DELETE API mutation.
+- **Active Note Deletion**: Integrated a **Delete Note** option into the existing three-dots (`MoreHorizontal` dropdown) menu in the workspace editor top bar header ([page.tsx](file:///c:/Dev/Projects/orma/apps/web/app/\(workspace\)/notes/\[noteId\]/page.tsx)), allowing users to delete the active note and redirecting them back to `/notes`.

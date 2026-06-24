@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, MoreHorizontal, User, Sparkles } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, User, Sparkles, Trash2 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, Note } from '../../../../lib/api'
 import Editor from '../../../../components/editor/Editor'
@@ -14,6 +14,36 @@ export default function NotePage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const noteId = params.noteId as string
+
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  // Click-away listener for three-dots menu
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setMenuOpen(false)
+    }
+    window.addEventListener('click', handleOutsideClick)
+    return () => window.removeEventListener('click', handleOutsideClick)
+  }, [])
+
+  // Delete note mutation
+  const deleteNoteMutation = useMutation({
+    mutationFn: () => api.notes.delete(noteId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+      router.push('/notes')
+    }
+  })
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      try {
+        await deleteNoteMutation.mutateAsync()
+      } catch (err) {
+        alert('Failed to delete note')
+      }
+    }
+  }
 
   // Fetch single note details
   const { data: note, isLoading, error } = useQuery({
@@ -97,10 +127,31 @@ export default function NotePage() {
         </div>
 
         {/* Member Avatars & Controls */}
-        <div className="flex items-center gap-3">
-          <button className="p-1.5 hover:bg-[#f5ece7] text-[#87736c] rounded-lg transition-all">
+        <div className="flex items-center gap-3 relative">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation()
+              setMenuOpen(!menuOpen)
+            }}
+            className="p-1.5 hover:bg-[#f5ece7] text-[#87736c] hover:text-[#94492c] rounded-lg transition-all"
+          >
             <MoreHorizontal className="w-5 h-5" />
           </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-11 w-36 bg-white border border-[#dac1b9]/40 rounded-xl shadow-lg py-1 text-xs text-[#54433d] z-20">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuOpen(false)
+                  handleDelete()
+                }}
+                className="w-full text-left px-4 py-2 hover:bg-[#ffdad6]/30 text-[#ba1a1a] flex items-center gap-2"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Note</span>
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

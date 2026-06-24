@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { FileText, Search, Plus, Sparkles, AlertCircle } from 'lucide-react'
+import { FileText, Search, Plus, Sparkles, AlertCircle, MoreVertical, Edit3, Trash2 } from 'lucide-react'
 import { api, Note } from '../../../lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -12,12 +12,22 @@ export default function NotesPage() {
   const queryClient = useQueryClient()
   const notebookId = searchParams.get('notebook_id') || undefined
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeMenuNoteId, setActiveMenuNoteId] = useState<string | null>(null)
 
   // Fetch all notes
   const { data: notes = [], isLoading, error } = useQuery({
     queryKey: ['notes', notebookId],
     queryFn: () => api.notes.list(notebookId)
   })
+
+  // Click-away listener for note cards context menus
+  useEffect(() => {
+    const handleOutsideClick = () => {
+      setActiveMenuNoteId(null)
+    }
+    window.addEventListener('click', handleOutsideClick)
+    return () => window.removeEventListener('click', handleOutsideClick)
+  }, [])
 
   // Create note mutation
   const createNoteMutation = useMutation({
@@ -27,6 +37,43 @@ export default function NotesPage() {
       router.push(`/notes/${newNote.id}`)
     }
   })
+
+  // Rename note mutation
+  const renameNoteMutation = useMutation({
+    mutationFn: ({ id, title }: { id: string; title: string }) => api.notes.update(id, { title }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
+
+  // Delete note mutation
+  const deleteNoteMutation = useMutation({
+    mutationFn: (id: string) => api.notes.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    }
+  })
+
+  const handleRename = async (noteId: string, currentTitle: string) => {
+    const newTitle = window.prompt('Rename Note', currentTitle)
+    if (newTitle !== null && newTitle.trim() !== '') {
+      try {
+        await renameNoteMutation.mutateAsync({ id: noteId, title: newTitle.trim() })
+      } catch (err) {
+        alert('Failed to rename note')
+      }
+    }
+  }
+
+  const handleDelete = async (noteId: string) => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      try {
+        await deleteNoteMutation.mutateAsync(noteId)
+      } catch (err) {
+        alert('Failed to delete note')
+      }
+    }
+  }
 
   const handleCreateNote = async () => {
     // If notebookId is present, create inside it. Otherwise fetch notebooks first or use default
@@ -126,12 +173,51 @@ export default function NotesPage() {
               <div
                 key={note.id}
                 onClick={() => router.push(`/notes/${note.id}`)}
-                className="p-6 bg-[#fff8f5] border border-[#dac1b9]/30 rounded-3xl hover:border-[#d67d5c] hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+                className="p-6 bg-[#fff8f5] border border-[#dac1b9]/30 rounded-3xl hover:border-[#d67d5c] hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between gap-4 group relative"
               >
                 <div>
-                  <h3 className="font-semibold text-base text-[#1e1b18] group-hover:text-[#94492c] transition-colors line-clamp-1">
-                    {note.title || 'Untitled Note'}
-                  </h3>
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-semibold text-base text-[#1e1b18] group-hover:text-[#94492c] transition-colors line-clamp-1 pr-6 flex-1">
+                      {note.title || 'Untitled Note'}
+                    </h3>
+                    <div className="absolute top-5 right-5 z-10">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveMenuNoteId(activeMenuNoteId === note.id ? null : note.id)
+                        }}
+                        className="p-1 hover:bg-[#f5ece7] rounded-lg transition-all text-[#87736c] hover:text-[#94492c]"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                      {activeMenuNoteId === note.id && (
+                        <div className="absolute right-0 mt-1 w-36 bg-white border border-[#dac1b9]/40 rounded-xl shadow-lg py-1 text-xs text-[#54433d] z-20">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setActiveMenuNoteId(null)
+                              handleRename(note.id, note.title)
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-[#fff8f5] hover:text-[#94492c] flex items-center gap-2"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Rename</span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setActiveMenuNoteId(null)
+                              handleDelete(note.id)
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-[#ffdad6]/30 text-[#ba1a1a] flex items-center gap-2"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <p className="text-xs text-[#87736c] mt-2 line-clamp-3 leading-relaxed">
                     {getNotePreview(note.content)}
                   </p>
