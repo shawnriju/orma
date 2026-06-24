@@ -24,9 +24,33 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
   const [isOpen, setIsOpen] = useState(false)
   const [mode, setMode] = useState<'choose' | 'custom' | 'ai'>('choose')
   const [mounted, setMounted] = useState(false)
+  const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStateRef = React.useRef({ offsetX: 0, offsetY: 0 })
+  const autoCloseTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined') return
+
+    const modalWidth = Math.min(window.innerWidth - 32, 840)
+    const modalHeight = Math.min(window.innerHeight - 32, 680)
+
+    setModalPosition({
+      x: Math.max(16, window.innerWidth - modalWidth - 72),
+      y: Math.max(96, window.innerHeight - modalHeight - 72),
+    })
+  }, [isOpen])
+
+  useEffect(() => {
+    return () => {
+      if (autoCloseTimerRef.current) {
+        clearTimeout(autoCloseTimerRef.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -55,6 +79,10 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
   }
 
   const closeModal = () => {
+    if (autoCloseTimerRef.current) {
+      clearTimeout(autoCloseTimerRef.current)
+      autoCloseTimerRef.current = null
+    }
     setIsOpen(false)
     resetDraftState()
     setMode('choose')
@@ -101,6 +129,17 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
       setDraftCards([])
       setErrorMsg('')
       queryClient.invalidateQueries({ queryKey: ['note-stats', noteId] })
+
+      if (autoCloseTimerRef.current) {
+        clearTimeout(autoCloseTimerRef.current)
+      }
+
+      autoCloseTimerRef.current = setTimeout(() => {
+        setIsOpen(false)
+        resetDraftState()
+        setMode('choose')
+        autoCloseTimerRef.current = null
+      }, 1500)
     },
     onError: (err: any) => {
       setErrorMsg(err.message || 'Failed to save flashcards.')
@@ -126,6 +165,43 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
     saveMutation.mutate(draftCards)
   }
 
+  const hasUnsavedDrafts = draftCards.length > 0 && mode === 'custom'
+
+  const handleDragStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isOpen) return
+
+    dragStateRef.current = {
+      offsetX: event.clientX - modalPosition.x,
+      offsetY: event.clientY - modalPosition.y,
+    }
+    setIsDragging(true)
+    ;(event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId)
+  }
+
+  const handleDragMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return
+
+    const modalWidth = Math.min(window.innerWidth - 32, 840)
+    const modalHeight = Math.min(window.innerHeight - 32, 680)
+    const maxX = Math.max(16, window.innerWidth - modalWidth - 16)
+    const maxY = Math.max(16, window.innerHeight - 96)
+
+    setModalPosition({
+      x: Math.min(maxX, Math.max(16, event.clientX - dragStateRef.current.offsetX)),
+      y: Math.min(maxY, Math.max(0, event.clientY - dragStateRef.current.offsetY)),
+    })
+  }
+
+  const handleDragEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return
+    setIsDragging(false)
+    try {
+      ;(event.currentTarget as HTMLDivElement).releasePointerCapture(event.pointerId)
+    } catch {
+      // Pointer capture may already be released when the drag ends.
+    }
+  }
+
   return (
     <>
       <button
@@ -142,19 +218,33 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
       </button>
 
       {mounted && isOpen && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1e1b18]/50 px-4 py-6 backdrop-blur-sm">
-          <div className="relative flex max-h-[min(90vh,48rem)] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-[#dac1b9]/40 bg-[#fff8f5] shadow-[0_30px_90px_rgba(44,22,16,0.28)]">
-            <div className="flex items-start justify-between border-b border-[#dac1b9]/30 px-6 py-5">
-              <div>
+        <div className="fixed inset-0 z-50 pointer-events-none">
+          <div
+            className="pointer-events-auto absolute flex max-h-[min(90vh,48rem)] w-[min(92vw,52rem)] max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-[#dac1b9]/40 bg-[#fff8f5]/88 shadow-[0_30px_90px_rgba(44,22,16,0.2)] backdrop-blur-md"
+            style={{ left: modalPosition.x, top: modalPosition.y }}
+          >
+            <div className={`flex items-start justify-between border-b border-[#dac1b9]/30 bg-gradient-to-r from-[#fff0e6] via-[#fff8f5] to-[#fff] px-6 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ${isDragging ? 'select-none' : ''}`}>
+              <div
+                className="cursor-move pr-4"
+                onPointerDown={handleDragStart}
+                onPointerMove={handleDragMove}
+                onPointerUp={handleDragEnd}
+                onPointerLeave={handleDragEnd}
+              >
                 <div className="flex items-center gap-2 text-[#94492c]">
-                  <Sparkles className="h-5 w-5" />
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#f5dfd5] text-[#94492c] shadow-sm ring-1 ring-[#e9c9bb]">
+                    <Sparkles className="h-4 w-4" />
+                  </span>
                   <h2 className="text-base font-semibold">Magic Study</h2>
                 </div>
-                <p className="mt-1 text-xs text-[#87736c]">Create custom flashcards or generate them with AI.</p>
+                <p className="mt-1 text-xs text-[#87736c]">Drag this panel around to keep the note visible underneath.</p>
               </div>
               <button
                 type="button"
-                onClick={closeModal}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  closeModal()
+                }}
                 className="rounded-xl p-2 text-[#87736c] transition-colors hover:bg-[#f5ece7] hover:text-[#54433d]"
               >
                 <X className="h-5 w-5" />
@@ -162,6 +252,12 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-5">
+              {hasUnsavedDrafts && !saveMutation.isPending && (
+                <div className="mb-4 rounded-2xl border border-[#f1b5b0] bg-[#ffdad6] px-4 py-3 text-xs font-medium text-[#ba1a1a]">
+                  You have unsaved flashcards in this panel. Save them before closing if you want to keep the draft.
+                </div>
+              )}
+
               {mode === 'choose' && (
                 <div className="grid gap-4 md:grid-cols-2">
                   <button
@@ -327,16 +423,16 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
             </div>
 
             <div className="border-t border-[#dac1b9]/30 bg-white/70 px-6 py-4 backdrop-blur">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-xs text-[#87736c]">
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0 text-xs text-[#87736c]">
                   {mode === 'choose' ? 'Pick how you want to build flashcards.' : 'You can switch modes without losing your draft until you close the modal.'}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
                   {mode === 'custom' && (
                     <button
                       type="button"
                       onClick={startAiFlow}
-                      className="rounded-2xl border border-[#dac1b9] px-4 py-2.5 text-sm font-semibold text-[#54433d] transition-colors hover:bg-[#f5ece7]"
+                      className="inline-flex items-center justify-center rounded-2xl border border-[#dac1b9] px-4 py-2.5 text-sm font-semibold text-[#54433d] transition-colors hover:bg-[#f5ece7]"
                     >
                       Generate with AI
                     </button>
@@ -352,13 +448,6 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
                       Save flashcards
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="rounded-2xl border border-[#dac1b9] px-4 py-2.5 text-sm font-semibold text-[#54433d] transition-colors hover:bg-[#f5ece7]"
-                  >
-                    Close
-                  </button>
                 </div>
               </div>
             </div>
