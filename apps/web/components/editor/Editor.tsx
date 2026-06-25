@@ -17,6 +17,7 @@ interface EditorProps {
 export default function Editor({ noteId, initialTitle, initialContent, onSave }: EditorProps) {
   const [title, setTitle] = useState(initialTitle)
   const { setSaveState, saveState } = useEditorStore()
+  const [initializedNoteId, setInitializedNoteId] = useState<string | null>(null)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Sync state with props ONLY when switching notes
@@ -45,9 +46,8 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
       clearTimeout(saveTimeoutRef.current)
     }
 
-    setSaveState('saving')
-
     saveTimeoutRef.current = setTimeout(async () => {
+      setSaveState('saving')
       try {
         let words = 0
         if (editor) {
@@ -83,10 +83,11 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
 
   // Set editor content when note changes
   useEffect(() => {
-    if (editor) {
+    if (editor && noteId !== initializedNoteId) {
       editor.commands.setContent(getSafeContent(initialContent))
+      setInitializedNoteId(noteId)
     }
-  }, [noteId, initialContent, editor])
+  }, [noteId, initialContent, editor, initializedNoteId])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
