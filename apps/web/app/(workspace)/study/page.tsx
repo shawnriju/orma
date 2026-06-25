@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Sparkles, Clock, AlertCircle, ArrowLeft, Check, X, CheckCircle2, RotateCw, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react'
+import { Sparkles, Clock, AlertCircle, ArrowLeft, Check, X, CheckCircle2, RotateCw, ChevronLeft, ChevronRight, BookOpen, Edit3 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { api, Flashcard } from '../../../lib/api'
+import EditFlashcardModal from '../../../components/flashcards/EditFlashcardModal'
 
 function StudyDashboard() {
   const router = useRouter()
@@ -22,6 +23,7 @@ function StudyDashboard() {
   // Confirmation Exit Modal State
   const [showExitModal, setShowExitModal] = useState(false)
   const [exitTargetUrl, setExitTargetUrl] = useState<string | null>(null)
+  const [editingCard, setEditingCard] = useState<Flashcard | null>(null)
 
   // Queries
   const { data: dueCards = [], isLoading: isDueLoading, error, refetch: refetchDue } = useQuery({
@@ -312,19 +314,31 @@ function StudyDashboard() {
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-[#fff8f5] text-[#94492c] rounded-full border border-[#dac1b9]/30 shrink-0">
                           Question
                         </span>
-                        {currentCard?.notes?.title && (
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleExitClick(`/notes/${currentCard.note_id}`)
+                              setEditingCard(currentCard)
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-full hover:bg-[#fcf3ef] hover:border-[#d67d5c]/60 transition-all font-semibold text-xs text-[#94492c] max-w-[220px] truncate cursor-pointer shadow-sm"
-                            title="Go to note"
+                            className="p-1.5 rounded-full hover:bg-[#fff8f5] border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
+                            title="Edit Card"
                           >
-                            <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
-                            <span>{currentCard.notes.title}</span>
+                            <Edit3 className="w-4 h-4" />
                           </button>
-                        )}
+                          {currentCard?.notes?.title && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleExitClick(`/notes/${currentCard.note_id}`)
+                              }}
+                              className="flex items-center gap-1.5 px-3 py-1 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-full hover:bg-[#fcf3ef] hover:border-[#d67d5c]/60 transition-all font-semibold text-xs text-[#94492c] max-w-[220px] truncate cursor-pointer shadow-sm"
+                              title="Go to note"
+                            >
+                              <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
+                              <span>{currentCard.notes.title}</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="flex-1 flex items-center justify-center py-4">
                         <p className="font-serif font-semibold text-xl md:text-2xl text-[#1e1b18] text-center leading-relaxed">
@@ -349,19 +363,31 @@ function StudyDashboard() {
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-white text-[#d67d5c] rounded-full border border-[#dac1b9]/30 shrink-0">
                           Answer
                         </span>
-                        {currentCard?.notes?.title && (
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleExitClick(`/notes/${currentCard.note_id}`)
+                              setEditingCard(currentCard)
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#dac1b9]/40 rounded-full hover:bg-[#fff8f5] hover:border-[#d67d5c]/60 transition-all font-semibold text-xs text-[#94492c] max-w-[220px] truncate cursor-pointer shadow-sm"
-                            title="Go to note"
+                            className="p-1.5 rounded-full hover:bg-white border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
+                            title="Edit Card"
                           >
-                            <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
-                            <span>{currentCard.notes.title}</span>
+                            <Edit3 className="w-4 h-4" />
                           </button>
-                        )}
+                          {currentCard?.notes?.title && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleExitClick(`/notes/${currentCard.note_id}`)
+                              }}
+                              className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#dac1b9]/40 rounded-full hover:bg-[#fff8f5] hover:border-[#d67d5c]/60 transition-all font-semibold text-xs text-[#94492c] max-w-[220px] truncate cursor-pointer shadow-sm"
+                              title="Go to note"
+                            >
+                              <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
+                              <span>{currentCard.notes.title}</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="flex-1 flex items-center justify-center py-4 overflow-y-auto">
                         <p className="font-medium text-lg md:text-xl text-[#54433d] text-center leading-relaxed">
@@ -451,6 +477,13 @@ function StudyDashboard() {
               </div>
             </div>
           </div>
+        )}
+
+        {editingCard && (
+          <EditFlashcardModal 
+            flashcard={editingCard}
+            onClose={() => setEditingCard(null)}
+          />
         )}
       </div>
     )

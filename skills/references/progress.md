@@ -44,3 +44,10 @@
 - **Bulk Card Operations**: Implemented individual card checkboxes and a global "Select All" toggle, allowing users to bulk delete selected draft cards easily.
 - **Existing Cards Side Panel**: Added a split-view right-side panel to the note editor ([page.tsx](file:///c:/Dev/Projects/orma/apps/web/app/\(workspace\)/notes/\[noteId\]/page.tsx)) that fetches and displays previously generated flashcards via `@tanstack/react-query`.
 - **Editor Header Refactor**: Replaced the three-dots context menu in the note editor with direct, accessible action buttons for toggling the Cards panel and Deleting the Note.
+
+### 8. Global Flashcard Editing System
+- **Backend Mutations**: Added `PATCH /api/v1/flashcards/:id` and `DELETE /api/v1/flashcards/:id` endpoints to the `flashcards.ts` Hono router for modifying saved records.
+- **Reusable Edit Modal**: Created a centralized `EditFlashcardModal.tsx` component that allows users to edit a card's question/answer or delete it completely. It uses `useMutation` to hit the API and instantly invalidates React Query `['flashcards']` and `['study']` caches to keep UI state in sync.
+- **Multi-Context Integration**: Added an inline "Edit" button (pencil icon) to flashcards in two key areas:
+  - **Note Editor Side Panel**: Users can edit/delete flashcards directly while viewing the related note.
+  - **Daily Review Study Session**: Users can fix typos on the fly during 3D flip-card reviews without interrupting their study flow.

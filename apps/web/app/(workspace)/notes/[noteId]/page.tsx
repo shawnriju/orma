@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Sparkles, Trash2, Library, X } from 'lucide-react'
+import { ArrowLeft, Sparkles, Trash2, Library, X, Edit3 } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api, Note } from '../../../../lib/api'
+import { api, Note, Flashcard } from '../../../../lib/api'
 import Editor from '../../../../components/editor/Editor'
 import FlashcardPanel from '../../../../components/flashcards/FlashcardPanel'
+import EditFlashcardModal from '../../../../components/flashcards/EditFlashcardModal'
 
 export default function NotePage() {
   const params = useParams()
@@ -16,6 +17,7 @@ export default function NotePage() {
   const noteId = params.noteId as string
 
   const [isCardsPanelOpen, setIsCardsPanelOpen] = useState(false)
+  const [editingCard, setEditingCard] = useState<Flashcard | null>(null)
 
   // Delete note mutation
   const deleteNoteMutation = useMutation({
@@ -220,10 +222,17 @@ export default function NotePage() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {flashcards.map((card) => (
-                    <div key={card.id} className="bg-white border border-[#dac1b9]/50 rounded-2xl p-4 flex flex-col gap-3 shadow-sm hover:border-[#d67d5c]/50 transition-colors group">
+                    <div key={card.id} className="bg-white border border-[#dac1b9]/50 rounded-2xl p-4 flex flex-col gap-3 shadow-sm hover:border-[#d67d5c]/50 transition-colors group relative">
+                      <button 
+                        onClick={() => setEditingCard(card)}
+                        className="absolute top-3 right-3 p-1.5 bg-white text-[#87736c] hover:text-[#d67d5c] hover:bg-[#fff8f5] border border-[#dac1b9]/30 hover:border-[#d67d5c]/40 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-sm"
+                        title="Edit Flashcard"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[#87736c] mb-1 block">Question</span>
-                        <p className="text-sm font-semibold text-[#1e1b18]">{card.question}</p>
+                        <p className="text-sm font-semibold text-[#1e1b18] pr-8">{card.question}</p>
                       </div>
                       <div className="w-full h-px bg-gradient-to-r from-transparent via-[#dac1b9]/30 to-transparent"></div>
                       <div>
@@ -240,6 +249,13 @@ export default function NotePage() {
       </div>
 
       <FlashcardPanel noteId={noteId} wordCount={note?.word_count ?? 0} />
+      
+      {editingCard && (
+        <EditFlashcardModal 
+          flashcard={editingCard}
+          onClose={() => setEditingCard(null)}
+        />
+      )}
     </div>
   )
 }

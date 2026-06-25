@@ -151,4 +151,52 @@ flashcards.post('/', zValidator('json', saveSchema), async (c) => {
   return c.json(data, 201)
 })
 
+// 3. PATCH /:id - Update an existing flashcard
+const updateSchema = z.object({
+  question: z.string().min(1, 'Question cannot be empty').optional(),
+  answer: z.string().min(1, 'Answer cannot be empty').optional()
+})
+
+flashcards.patch('/:id', zValidator('json', updateSchema), async (c) => {
+  const userId = c.get('userId')
+  const flashcardId = c.req.param('id')
+  const updates = c.req.valid('json')
+
+  if (Object.keys(updates).length === 0) {
+    return c.json({ error: 'No fields to update' }, 400)
+  }
+
+  const { data, error } = await supabase
+    .from('flashcards')
+    .update(updates)
+    .eq('id', flashcardId)
+    .eq('user_id', userId)
+    .select()
+    .single()
+
+  if (error) {
+    return c.json({ error: error.message }, 500)
+  }
+
+  return c.json(data)
+})
+
+// 4. DELETE /:id - Delete an existing flashcard
+flashcards.delete('/:id', async (c) => {
+  const userId = c.get('userId')
+  const flashcardId = c.req.param('id')
+
+  const { error } = await supabase
+    .from('flashcards')
+    .delete()
+    .eq('id', flashcardId)
+    .eq('user_id', userId)
+
+  if (error) {
+    return c.json({ error: error.message }, 500)
+  }
+
+  return c.json({ success: true })
+})
+
 export default flashcards

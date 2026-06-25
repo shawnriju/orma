@@ -113,6 +113,15 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ note_id: noteId, cards }),
       }),
+    update: (id: string, data: { question?: string; answer?: string }) =>
+      apiCall<Flashcard>(`/api/v1/flashcards/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      apiCall<{ success: boolean }>(`/api/v1/flashcards/${id}`, {
+        method: 'DELETE',
+      }),
   },
   study: {
     due: (noteId?: string) => apiCall<Flashcard[]>(`/api/v1/study/due${noteId ? `?note_id=${noteId}` : ''}`),
