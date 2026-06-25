@@ -38,3 +38,9 @@
   - **Rename**: Prompts users to rename the note and triggers the PATCH API mutation.
   - **Delete**: Prompts for confirmation and deletes the note record via the DELETE API mutation.
 - **Active Note Deletion**: Integrated a **Delete Note** option into the existing three-dots (`MoreHorizontal` dropdown) menu in the workspace editor top bar header ([page.tsx](file:///c:/Dev/Projects/orma/apps/web/app/\(workspace\)/notes/\[noteId\]/page.tsx)), allowing users to delete the active note and redirecting them back to `/notes`.
+
+### 7. Flashcard Magic Study Modal UX & Existing Cards Panel
+- **Collapsible UI**: Redesigned the draft cards in the Magic Study modal ([FlashcardPanel.tsx](file:///c:/Dev/Projects/orma/apps/web/components/flashcards/FlashcardPanel.tsx)) to render collapsed by default (displaying only a truncated question) with `ChevronUp`/`ChevronDown` toggle controls to reduce scroll fatigue.
+- **Bulk Card Operations**: Implemented individual card checkboxes and a global "Select All" toggle, allowing users to bulk delete selected draft cards easily.
+- **Existing Cards Side Panel**: Added a split-view right-side panel to the note editor ([page.tsx](file:///c:/Dev/Projects/orma/apps/web/app/\(workspace\)/notes/\[noteId\]/page.tsx)) that fetches and displays previously generated flashcards via `@tanstack/react-query`.
+- **Editor Header Refactor**: Replaced the three-dots context menu in the note editor with direct, accessible action buttons for toggling the Cards panel and Deleting the Note.

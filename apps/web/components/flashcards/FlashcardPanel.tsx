@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Sparkles, Trash2, CheckCircle2, AlertCircle, Loader2, X, Plus } from 'lucide-react'
+import { Sparkles, Trash2, CheckCircle2, AlertCircle, Loader2, X, Plus, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react'
 import { api } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
@@ -19,6 +19,8 @@ interface DraftCard {
 export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProps) {
   const queryClient = useQueryClient()
   const [draftCards, setDraftCards] = useState<DraftCard[]>([])
+  const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set())
+  const [selectedCards, setSelectedCards] = useState<Set<number>>(new Set())
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -68,6 +70,8 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
 
   const resetDraftState = () => {
     setDraftCards([])
+    setExpandedCards(new Set())
+    setSelectedCards(new Set())
     setSuccessMsg('')
     setErrorMsg('')
   }
@@ -91,6 +95,8 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
   const startCustomFlow = () => {
     setMode('custom')
     setDraftCards([{ question: '', answer: '' }])
+    setExpandedCards(new Set([0]))
+    setSelectedCards(new Set())
     setSuccessMsg('')
     setErrorMsg('')
   }
@@ -98,6 +104,8 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
   const startAiFlow = () => {
     setMode('ai')
     setDraftCards([])
+    setExpandedCards(new Set())
+    setSelectedCards(new Set())
     setSuccessMsg('')
     setErrorMsg('')
   }
@@ -111,6 +119,8 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
         setDraftCards([])
       } else {
         setDraftCards(cards)
+        setExpandedCards(new Set())
+        setSelectedCards(new Set())
         setMode('custom')
         setErrorMsg('')
         setSuccessMsg('')
@@ -154,15 +164,85 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
 
   const handleDeleteCard = (index: number) => {
     setDraftCards(draftCards.filter((_, i) => i !== index))
+    setExpandedCards(prev => {
+      const next = new Set<number>()
+      prev.forEach(i => {
+        if (i < index) next.add(i)
+        else if (i > index) next.add(i - 1)
+      })
+      return next
+    })
+    setSelectedCards(prev => {
+      const next = new Set<number>()
+      prev.forEach(i => {
+        if (i < index) next.add(i)
+        else if (i > index) next.add(i - 1)
+      })
+      return next
+    })
   }
 
   const addCard = () => {
-    setDraftCards((current) => [...current, { question: '', answer: '' }])
+    setDraftCards((current) => {
+      const newIdx = current.length
+      setExpandedCards(prev => {
+        const next = new Set(prev)
+        next.add(newIdx)
+        return next
+      })
+      return [...current, { question: '', answer: '' }]
+    })
   }
 
   const handleSaveAll = () => {
     if (draftCards.length === 0) return
     saveMutation.mutate(draftCards)
+  }
+
+  const allSelected = draftCards.length > 0 && selectedCards.size === draftCards.length
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedCards(new Set())
+    } else {
+      setSelectedCards(new Set(draftCards.map((_, i) => i)))
+    }
+  }
+
+  const handleDeleteSelected = () => {
+    const toDelete = Array.from(selectedCards)
+    const newCards = draftCards.filter((_, i) => !toDelete.includes(i))
+    setDraftCards(newCards)
+    setSelectedCards(new Set())
+    setExpandedCards(prev => {
+       const next = new Set<number>()
+       let currentNewIndex = 0
+       for(let i=0; i<draftCards.length; i++) {
+         if (!toDelete.includes(i)) {
+           if (prev.has(i)) next.add(currentNewIndex)
+           currentNewIndex++
+         }
+       }
+       return next
+    })
+  }
+
+  const toggleSelectCard = (index: number) => {
+    setSelectedCards(prev => {
+      const next = new Set(prev)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
+  }
+
+  const toggleExpandCard = (index: number) => {
+    setExpandedCards(prev => {
+      const next = new Set(prev)
+      if (next.has(index)) next.delete(index)
+      else next.add(index)
+      return next
+    })
   }
 
   const hasUnsavedDrafts = draftCards.length > 0 && mode === 'custom'
@@ -374,49 +454,116 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
                         Edit your cards here, or add more before saving.
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={addCard}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-[#dac1b9] bg-white px-3 py-2 text-xs font-semibold text-[#54433d] transition-colors hover:bg-[#f5ece7]"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add card
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={addCard}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-[#dac1b9] bg-white px-3 py-2 text-xs font-semibold text-[#54433d] transition-colors hover:bg-[#f5ece7]"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add card
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col gap-4">
-                    {draftCards.map((card, i) => (
-                      <div
-                        key={i}
-                        className="group relative flex flex-col gap-3 rounded-[1.5rem] border border-[#dac1b9]/50 bg-white p-4 shadow-sm transition-all"
+                  {draftCards.length > 0 && (
+                    <div className="flex items-center justify-between rounded-xl bg-white/50 px-4 py-2 border border-[#dac1b9]/30">
+                      <button 
+                        type="button" 
+                        onClick={toggleSelectAll}
+                        className="flex items-center gap-2 text-xs font-semibold text-[#54433d] transition-colors hover:text-[#94492c]"
                       >
+                        {allSelected ? <CheckSquare className="h-4 w-4 text-[#d67d5c]" /> : <Square className="h-4 w-4 text-[#87736c]" />}
+                        {allSelected ? 'Deselect All' : 'Select All'}
+                      </button>
+                      
+                      {selectedCards.size > 0 && (
                         <button
                           type="button"
-                          onClick={() => handleDeleteCard(i)}
-                          className="absolute right-3 top-3 rounded-lg p-1.5 text-[#87736c] opacity-0 transition-all hover:bg-[#ffdad6]/20 hover:text-[#ba1a1a] group-hover:opacity-100"
+                          onClick={handleDeleteSelected}
+                          className="flex items-center gap-1.5 text-xs font-semibold text-[#ba1a1a] transition-colors hover:text-[#93000a]"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Delete Selected ({selectedCards.size})
                         </button>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold uppercase text-[#87736c]">Question</label>
-                          <textarea
-                            value={card.question}
-                            onChange={(e) => handleUpdateCard(i, 'question', e.target.value)}
-                            className="min-h-20 w-full resize-none rounded-xl border border-[#dac1b9]/30 bg-white p-2 text-xs font-semibold text-[#1e1b18] outline-none focus:border-[#d67d5c]"
-                            rows={2}
-                          />
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-4">
+                    {draftCards.map((card, i) => {
+                      const isExpanded = expandedCards.has(i)
+                      const isSelected = selectedCards.has(i)
+                      
+                      return (
+                        <div
+                          key={i}
+                          className={`group relative flex flex-col gap-3 rounded-[1.5rem] border ${isSelected ? 'border-[#d67d5c] bg-[#fff8f5]' : 'border-[#dac1b9]/50 bg-white'} p-4 shadow-sm transition-all`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <button
+                              type="button"
+                              onClick={() => toggleSelectCard(i)}
+                              className="mt-1 shrink-0 text-[#87736c] transition-colors hover:text-[#d67d5c]"
+                            >
+                              {isSelected ? <CheckSquare className="h-4 w-4 text-[#d67d5c]" /> : <Square className="h-4 w-4" />}
+                            </button>
+                            
+                            <div className="flex-1 min-w-0">
+                              {!isExpanded ? (
+                                <button 
+                                  type="button" 
+                                  onClick={() => toggleExpandCard(i)}
+                                  className="w-full text-left"
+                                >
+                                  <p className="truncate text-sm font-semibold text-[#1e1b18]">
+                                    {card.question || <span className="italic text-[#87736c]">Empty question...</span>}
+                                  </p>
+                                </button>
+                              ) : (
+                                <div className="flex flex-col gap-3 w-full">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-semibold uppercase text-[#87736c]">Question</label>
+                                    <textarea
+                                      value={card.question}
+                                      onChange={(e) => handleUpdateCard(i, 'question', e.target.value)}
+                                      className="min-h-20 w-full resize-none rounded-xl border border-[#dac1b9]/30 bg-white p-2 text-xs font-semibold text-[#1e1b18] outline-none focus:border-[#d67d5c]"
+                                      rows={2}
+                                    />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-semibold uppercase text-[#87736c]">Answer</label>
+                                    <textarea
+                                      value={card.answer}
+                                      onChange={(e) => handleUpdateCard(i, 'answer', e.target.value)}
+                                      className="min-h-20 w-full resize-none rounded-xl border border-[#dac1b9]/30 bg-white p-2 text-xs font-medium text-[#54433d] outline-none focus:border-[#d67d5c]"
+                                      rows={2}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => toggleExpandCard(i)}
+                                className="rounded-lg p-1.5 text-[#87736c] transition-all hover:bg-[#f5ece7] hover:text-[#54433d]"
+                              >
+                                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteCard(i)}
+                                className="rounded-lg p-1.5 text-[#87736c] transition-all hover:bg-[#ffdad6]/50 hover:text-[#ba1a1a]"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-semibold uppercase text-[#87736c]">Answer</label>
-                          <textarea
-                            value={card.answer}
-                            onChange={(e) => handleUpdateCard(i, 'answer', e.target.value)}
-                            className="min-h-20 w-full resize-none rounded-xl border border-[#dac1b9]/30 bg-white p-2 text-xs font-medium text-[#54433d] outline-none focus:border-[#d67d5c]"
-                            rows={2}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}
