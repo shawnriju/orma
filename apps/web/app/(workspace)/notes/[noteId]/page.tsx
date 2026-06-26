@@ -44,6 +44,14 @@ export default function NotePage() {
     queryFn: () => api.notes.get(noteId)
   })
 
+  // Fetch notebooks to find notebook title for breadcrumbs
+  const { data: notebooks } = useQuery({
+    queryKey: ['notebooks'],
+    queryFn: () => api.notebooks.list()
+  })
+
+  const currentNotebook = notebooks?.find(n => n.id === note?.notebook_id)
+
   // Fetch flashcard stats for this note
   const { data: stats } = useQuery({
     queryKey: ['note-stats', noteId],
@@ -122,7 +130,16 @@ export default function NotePage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#87736c]">
-            <span>Workspace</span>
+            {currentNotebook ? (
+              <span className="flex items-center gap-1.5">
+                <span>{currentNotebook.emoji || '📁'}</span>
+                <span>{currentNotebook.title}</span>
+                <span className="opacity-50">/</span>
+                <span className="truncate max-w-[150px]">{note?.title || 'Untitled Note'}</span>
+              </span>
+            ) : (
+              <span>Workspace</span>
+            )}
           </div>
         </div>
 
@@ -138,6 +155,11 @@ export default function NotePage() {
           >
             <Library className="w-4 h-4" />
             <span>Cards</span>
+            {stats && stats.totalCount > 0 && (
+              <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isCardsPanelOpen ? 'bg-white text-[#d67d5c]' : 'bg-[#d67d5c] text-white'}`}>
+                {stats.totalCount}
+              </span>
+            )}
           </button>
           
           <div className="w-px h-4 bg-[#dac1b9]/50 mx-1"></div>
@@ -165,32 +187,6 @@ export default function NotePage() {
             />
           </div>
 
-          {/* Note Study Footer (Coral Box) */}
-          {stats && stats.totalCount > 0 && (
-            <footer className="bg-[#fff8f5] border-t border-[#dac1b9]/30 px-6 py-4 flex items-center justify-between shrink-0 z-10 sticky bottom-0">
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-[#d67d5c]" />
-                <span className="text-sm font-semibold text-[#87736c]">
-                  <strong className="text-[#1e1b18]">{stats.totalCount}</strong> cards from this note ·{' '}
-                  <strong className="text-[#94492c]">{stats.dueCount}</strong> due today
-                </span>
-              </div>
-              <div>
-                {stats.dueCount > 0 ? (
-                  <Link
-                    href={`/study?noteId=${noteId}`}
-                    className="px-4 py-2 bg-[#d67d5c] hover:bg-[#94492c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center gap-1.5"
-                  >
-                    <span>Study Now</span>
-                  </Link>
-                ) : (
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#506351] bg-[#d3e8d1] px-3 py-1.5 rounded-xl border border-[#dac1b9]/20">
-                    All Caught Up
-                  </span>
-                )}
-              </div>
-            </footer>
-          )}
         </div>
 
         {/* Existing Flashcards Side Panel */}
@@ -201,12 +197,22 @@ export default function NotePage() {
                 <Library className="w-4 h-4 text-[#d67d5c]" />
                 Generated Cards
               </h3>
-              <button 
-                onClick={() => setIsCardsPanelOpen(false)}
-                className="p-1 hover:bg-[#f5ece7] text-[#87736c] rounded-lg transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                {stats && stats.dueCount > 0 && (
+                  <Link
+                    href={`/study?noteId=${noteId}`}
+                    className="px-3 py-1 bg-[#d67d5c] hover:bg-[#94492c] text-white text-[10px] font-semibold rounded-lg transition-all shadow-sm"
+                  >
+                    Study Due ({stats.dueCount})
+                  </Link>
+                )}
+                <button 
+                  onClick={() => setIsCardsPanelOpen(false)}
+                  className="p-1 hover:bg-[#f5ece7] text-[#87736c] rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             
             <div className="flex-1 overflow-y-auto px-5 py-4 pb-32">

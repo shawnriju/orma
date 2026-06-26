@@ -126,7 +126,7 @@ export default function NotesPage() {
   return (
     <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden">
       {/* Header */}
-      <header className="h-16 border-b border-[#dac1b9]/30 px-8 flex items-center justify-between">
+      <header className="h-16 border-b border-[#dac1b9]/30 pr-8 pl-16 flex items-center justify-between">
         <h1 className="font-serif font-bold text-xl text-[#94492c]">My Notes</h1>
         <div className="flex items-center gap-4 w-72 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-xl px-3 py-1.5 focus-within:border-[#d67d5c] transition-all">
           <Search className="w-4 h-4 text-[#87736c]" />
@@ -162,9 +162,10 @@ export default function NotesPage() {
             </div>
             <button
               onClick={handleCreateNote}
-              className="px-6 py-3 bg-[#d67d5c] hover:bg-[#94492c] text-white text-sm font-semibold rounded-2xl shadow-sm transition-all"
+              className="mt-4 px-8 py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white text-base font-bold rounded-2xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-2 group"
             >
-              Create Note
+              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+              <span>Create Your First Note</span>
             </button>
           </div>
         ) : (

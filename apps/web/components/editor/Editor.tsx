@@ -145,13 +145,13 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
         value={title}
         onChange={handleTitleChange}
         placeholder="Untitled Note"
-        className="w-full text-4xl md:text-5xl font-bold font-serif text-[#1e1b18] placeholder-[#dac1b9] outline-none border-none mb-6 bg-transparent"
+        className="w-full text-3xl md:text-4xl font-bold font-serif text-[#1e1b18] placeholder-[#dac1b9] outline-none border-none mb-4 bg-transparent"
       />
 
       {/* Editor Content */}
       <div 
         onClick={() => editor?.commands.focus()}
-        className="prose prose-neutral max-w-none focus:outline-none cursor-text min-h-[400px]"
+        className="prose prose-lg prose-neutral max-w-none focus:outline-none cursor-text min-h-[400px]"
       >
         <EditorContent 
           editor={editor} 

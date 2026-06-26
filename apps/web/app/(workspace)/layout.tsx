@@ -32,6 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const pathname = usePathname()
@@ -62,6 +63,20 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
     return () => subscription.unsubscribe()
   }, [router])
+
+  useEffect(() => {
+    setIsMounted(true)
+    const savedState = localStorage.getItem('orma_sidebarOpen')
+    if (savedState !== null) {
+      setSidebarOpen(JSON.parse(savedState))
+    }
+  }, [])
+
+  const handleToggleSidebar = () => {
+    const newState = !sidebarOpen
+    setSidebarOpen(newState)
+    localStorage.setItem('orma_sidebarOpen', JSON.stringify(newState))
+  }
 
   // Fetch notebooks
   const { data: notebooks = [], isLoading: loadingNotebooks } = useQuery({
@@ -119,7 +134,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-[#fff8f5] text-[#1e1b18] overflow-hidden font-sans">
       {/* Mobile menu trigger */}
       <button 
-        onClick={() => setSidebarOpen(!sidebarOpen)}
+        onClick={handleToggleSidebar}
         className="fixed top-4 left-4 z-50 p-2 bg-[#fff] border border-[#dac1b9] rounded-lg shadow-sm md:hidden hover:bg-[#fbf2ed] transition-colors"
       >
         {sidebarOpen ? <X className="w-5 h-5 text-[#94492c]" /> : <Menu className="w-5 h-5 text-[#94492c]" />}
@@ -127,19 +142,28 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-[#fff8f5] border-r border-[#dac1b9]/50 flex flex-col justify-between p-6 transition-transform duration-300 md:static md:translate-x-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed inset-y-0 left-0 z-40 w-64 bg-[#fff8f5] border-r border-[#dac1b9]/50 flex flex-col justify-between p-6 transition-all duration-300
+        ${sidebarOpen ? 'translate-x-0 md:static md:ml-0' : '-translate-x-full md:absolute md:-translate-x-full'}
+        ${!isMounted ? 'md:transition-none' : ''}
       `}>
         <div className="flex flex-col gap-8 overflow-y-auto">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#94492c] to-[#d67d5c] flex items-center justify-center text-[#fff] shadow-sm font-semibold">
-              O
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#94492c] to-[#d67d5c] flex items-center justify-center text-[#fff] shadow-sm font-semibold">
+                O
+              </div>
+              <div>
+                <h1 className="font-semibold text-lg leading-tight tracking-tight text-[#94492c]">Orma</h1>
+                <span className="text-xs text-[#87736c] font-medium font-sans">Stay curious</span>
+              </div>
             </div>
-            <div>
-              <h1 className="font-semibold text-lg leading-tight tracking-tight text-[#94492c]">Orma</h1>
-              <span className="text-xs text-[#87736c] font-medium font-sans">Stay curious</span>
-            </div>
+            <button 
+              onClick={handleToggleSidebar}
+              className="hidden md:flex p-1.5 hover:bg-[#f5ece7] rounded-lg transition-colors text-[#87736c] hover:text-[#94492c]"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
           </div>
 
           {/* New Note Button */}
@@ -246,6 +270,15 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col relative overflow-hidden bg-[#fff]">
+        {/* Desktop floating toggle button when sidebar is collapsed */}
+        {!sidebarOpen && isMounted && (
+          <button 
+            onClick={handleToggleSidebar}
+            className="hidden md:flex absolute top-4 left-4 z-30 p-2 bg-[#fff] border border-[#dac1b9]/50 rounded-lg shadow-sm hover:bg-[#fbf2ed] transition-colors text-[#87736c] hover:text-[#94492c]"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         {children}
       </main>
     </div>
