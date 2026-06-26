@@ -311,9 +311,19 @@ function StudyDashboard() {
                       }}
                     >
                       <div className="flex justify-between items-center gap-4">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-[#fff8f5] text-[#94492c] rounded-full border border-[#dac1b9]/30 shrink-0">
-                          Question
-                        </span>
+                       {currentCard?.notes?.title && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleExitClick(`/notes/${currentCard.note_id}`)
+                              }}
+                              className="flex items-center gap-1.5 px-3 py-1 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-full hover:bg-[#fcf3ef] hover:border-[#d67d5c]/60 transition-all font-semibold text-xs text-[#94492c] max-w-[220px] truncate cursor-pointer shadow-sm"
+                              title="Go to note"
+                            >
+                              <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
+                              <span>{ currentCard.notes.title}</span>
+                            </button>
+                          )}
                         <div className="flex items-center gap-2">
                           <button
                             onClick={(e) => {
@@ -325,19 +335,7 @@ function StudyDashboard() {
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
-                          {currentCard?.notes?.title && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleExitClick(`/notes/${currentCard.note_id}`)
-                              }}
-                              className="flex items-center gap-1.5 px-3 py-1 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-full hover:bg-[#fcf3ef] hover:border-[#d67d5c]/60 transition-all font-semibold text-xs text-[#94492c] max-w-[220px] truncate cursor-pointer shadow-sm"
-                              title="Go to note"
-                            >
-                              <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
-                              <span>{currentCard.notes.title}</span>
-                            </button>
-                          )}
+                          
                         </div>
                       </div>
                       <div className="flex-1 flex items-center justify-center py-4">
@@ -360,21 +358,7 @@ function StudyDashboard() {
                       }}
                     >
                       <div className="flex justify-between items-center gap-4">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-white text-[#d67d5c] rounded-full border border-[#dac1b9]/30 shrink-0">
-                          Answer
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setEditingCard(currentCard)
-                            }}
-                            className="p-1.5 rounded-full hover:bg-white border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
-                            title="Edit Card"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          {currentCard?.notes?.title && (
+                       {currentCard?.notes?.title && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -387,6 +371,18 @@ function StudyDashboard() {
                               <span>{currentCard.notes.title}</span>
                             </button>
                           )}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditingCard(currentCard)
+                            }}
+                            className="p-1.5 rounded-full hover:bg-white border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
+                            title="Edit Card"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                         
                         </div>
                       </div>
                       <div className="flex-1 flex items-center justify-center py-4 overflow-y-auto">
