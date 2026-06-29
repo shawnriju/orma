@@ -35,6 +35,22 @@ flashcards.get('/', async (c) => {
   return c.json(data)
 })
 
+// 0.5. GET /count - Get total count of flashcards for the user
+flashcards.get('/count', async (c) => {
+  const userId = c.get('userId')
+  
+  const { count, error } = await supabase
+    .from('flashcards')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+
+  if (error) {
+    return c.json({ error: error.message }, 500)
+  }
+
+  return c.json({ count: count || 0 })
+})
+
 // Helper: extract plain text from ProseMirror JSON document
 function extractTextFromProseMirror(doc: any): string {
   if (!doc) return ''

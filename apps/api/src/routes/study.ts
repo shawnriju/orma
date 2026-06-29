@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { supabase } from '../db/client.js'
+import { computeNextInterval, Rating } from '../lib/sm2.js'
 
 type Env = {
   Variables: {
@@ -35,18 +36,18 @@ study.get('/due', async (c) => {
 })
 
 const reviewSchema = z.object({
-  flashcard_id: z.string().uuid(),
-  correct: z.boolean(),
+  card_id: z.string().uuid(),
+  rating: z.enum(['hard', 'ok', 'easy']),
 })
 
 study.post('/review', zValidator('json', reviewSchema), async (c) => {
   const userId = c.get('userId')
-  const { flashcard_id, correct } = c.req.valid('json')
+  const { card_id, rating } = c.req.valid('json')
 
   const { data: flashcard, error: fetchError } = await supabase
     .from('flashcards')
-    .select('id, interval_days, ease_factor')
-    .eq('id', flashcard_id)
+    .select('id, interval_days, ease_factor, repetitions, times_reviewed, times_correct')
+    .eq('id', card_id)
     .eq('user_id', userId)
     .single()
 
@@ -54,27 +55,29 @@ study.post('/review', zValidator('json', reviewSchema), async (c) => {
     return c.json({ error: 'Flashcard not found or unauthorized' }, 404)
   }
 
-  const currentInterval = Math.max(1, flashcard.interval_days || 1)
-  const currentEase = Math.max(1.3, flashcard.ease_factor || 2.5)
+  const cardState = {
+    interval_days: flashcard.interval_days || 0,
+    ease_factor: flashcard.ease_factor || 2.5,
+    repetitions: flashcard.repetitions || 0,
+  }
 
-  const nextInterval = correct ? Math.min(currentInterval === 1 ? 3 : Math.round(currentInterval * currentEase), 3650) : 1
-  const nextEase = correct
-    ? Math.min(3, currentEase + 0.1)
-    : Math.max(1.3, currentEase - 0.2)
+  const { interval_days, ease_factor, repetitions, next_review_at } = computeNextInterval(cardState, rating as Rating)
 
-  const nextReviewAt = new Date()
-  nextReviewAt.setDate(nextReviewAt.getDate() + nextInterval)
-
+  const isCorrect = rating === 'ok' || rating === 'easy'
+  
   const { data, error } = await supabase
     .from('flashcards')
     .update({
-      interval_days: nextInterval,
-      ease_factor: nextEase,
-      next_review_at: nextReviewAt.toISOString(),
+      interval_days,
+      ease_factor,
+      repetitions,
+      next_review_at: next_review_at.toISOString(),
+      times_reviewed: (flashcard.times_reviewed || 0) + 1,
+      times_correct: (flashcard.times_correct || 0) + (isCorrect ? 1 : 0)
     })
-    .eq('id', flashcard_id)
+    .eq('id', card_id)
     .eq('user_id', userId)
-    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, created_at')
+    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, repetitions, created_at')
     .single()
 
   if (error || !data) {
@@ -82,6 +85,125 @@ study.post('/review', zValidator('json', reviewSchema), async (c) => {
   }
 
   return c.json(data)
+})
+
+study.get('/daily-queue', async (c) => {
+  const userId = c.get('userId')
+
+  // Fetch daily_review_limit
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('daily_review_limit')
+    .eq('id', userId)
+    .single()
+    
+  const limit = profile?.daily_review_limit || 5
+
+  const { data, error } = await supabase
+    .from('flashcards')
+    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, repetitions, created_at, notes ( title )')
+    .eq('user_id', userId)
+    .lte('next_review_at', new Date().toISOString())
+    .order('next_review_at', { ascending: true })
+    .limit(limit)
+
+  if (error) {
+    return c.json({ error: error.message }, 500)
+  }
+
+  // Shuffle the result array
+  const shuffled = data.sort(() => 0.5 - Math.random())
+
+  return c.json(shuffled)
+})
+
+study.get('/due-count', async (c) => {
+  const userId = c.get('userId')
+
+  const { count, error } = await supabase
+    .from('flashcards')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .lte('next_review_at', new Date().toISOString())
+
+  if (error) {
+    return c.json({ error: error.message }, 500)
+  }
+
+  return c.json({ count: count || 0 })
+})
+
+const sessionSchema = z.object({
+  hard_count: z.number().int().min(0),
+  ok_count: z.number().int().min(0),
+  easy_count: z.number().int().min(0),
+})
+
+study.post('/session', zValidator('json', sessionSchema), async (c) => {
+  const userId = c.get('userId')
+  const { hard_count, ok_count, easy_count } = c.req.valid('json')
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('last_review_date, streak_count')
+    .eq('id', userId)
+    .single()
+
+  if (profileError || !profile) {
+    return c.json({ error: 'Profile not found' }, 404)
+  }
+
+  const today = new Date()
+  today.setUTCHours(0, 0, 0, 0)
+  
+  let newStreak = profile.streak_count || 0
+  let newLastReviewDate = today.toISOString().split('T')[0]
+
+  if (profile.last_review_date) {
+    const lastDate = new Date(profile.last_review_date)
+    lastDate.setUTCHours(0, 0, 0, 0)
+    
+    const diffTime = Math.abs(today.getTime() - lastDate.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 1) {
+      newStreak += 1
+    } else if (diffDays > 1) {
+      newStreak = 1
+    }
+  } else {
+    newStreak = 1
+  }
+
+  await supabase
+    .from('profiles')
+    .update({
+      streak_count: newStreak,
+      last_review_date: newLastReviewDate
+    })
+    .eq('id', userId)
+
+  const { error: sessionError } = await supabase
+    .from('review_sessions')
+    .insert({
+      user_id: userId,
+      hard_count,
+      ok_count,
+      easy_count,
+    })
+
+  if (sessionError) {
+    return c.json({ error: sessionError.message }, 500)
+  }
+
+  const total = hard_count + ok_count + easy_count
+  const accuracy = total > 0 ? ((ok_count + easy_count) / total) * 100 : 0
+
+  return c.json({
+    streak_count: newStreak,
+    cards_reviewed: total,
+    accuracy
+  })
 })
 
 export default study

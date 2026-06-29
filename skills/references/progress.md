@@ -51,3 +51,15 @@
 - **Multi-Context Integration**: Added an inline "Edit" button (pencil icon) to flashcards in two key areas:
   - **Note Editor Side Panel**: Users can edit/delete flashcards directly while viewing the related note.
   - **Daily Review Study Session**: Users can fix typos on the fly during 3D flip-card reviews without interrupting their study flow.
+
+### 9. Real SM-2 Spaced Repetition & Daily Review UI
+- **SM-2 Algorithm Integration**: Implemented a true SM-2 scheduling algorithm (`computeNextInterval` and `previewIntervals`) to dynamically calculate ease factors, intervals, and repetitions for flashcards based on user ratings (Hard, OK, Easy).
+- **Backend API Routes**: 
+  - Added `GET /api/v1/study/daily-queue` and `GET /api/v1/study/due-count` for fetching due cards respecting daily limits.
+  - Added `POST /api/v1/study/session` to track streaks and daily study history.
+  - Created a new `profiles` router (`GET /me`, `PATCH /me`) to manage user limits.
+- **Frontend Navigation Reorganization**: Renamed the old "Daily Review" to "Study" (Free form review) and added a dedicated new "Daily Review" link to the sidebar.
+- **New Daily Review UX**: 
+  - Created `apps/web/app/(workspace)/daily-review/page.tsx` with comprehensive states (`loading`, `start`, `empty`, `reviewing`, `complete`).
+  - Implemented interval hint previews ("Tomorrow", "~3 days") under rating buttons dynamically populated by the SM-2 utility.
+  - Added session completion feedback with streak tracking and an accuracy score to motivate consistency.

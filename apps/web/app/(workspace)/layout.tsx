@@ -196,6 +196,17 @@ function AppShell({ children }: { children: React.ReactNode }) {
                   : 'hover:bg-[#f5ece7] text-[#54433d]'
               }`}
             >
+              <FileText className="w-5 h-5" />
+              <span>Study</span>
+            </Link>
+            <Link 
+              href="/daily-review" 
+              className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-medium text-sm transition-all ${
+                pathname.startsWith('/daily-review') 
+                  ? 'bg-[#d3e8d1] text-[#0e1f11]' 
+                  : 'hover:bg-[#f5ece7] text-[#54433d]'
+              }`}
+            >
               <Clock className="w-5 h-5" />
               <span>Daily Review</span>
             </Link>

@@ -60,10 +60,20 @@ export interface Flashcard {
   next_review_at?: string
   interval_days?: number
   ease_factor?: number
+  repetitions?: number
   created_at: string
   notes?: {
     title: string
   } | null
+}
+
+export interface Profile {
+  id: string
+  daily_review_limit: number
+  email_notifications_enabled: boolean
+  streak_count: number
+  last_review_date: string | null
+  display_name: string | null
 }
 
 export const api = {
@@ -103,6 +113,7 @@ export const api = {
   flashcards: {
     list: (noteId?: string) =>
       apiCall<Flashcard[]>(`/api/v1/flashcards${noteId ? `?note_id=${noteId}` : ''}`),
+    count: () => apiCall<{ count: number }>('/api/v1/flashcards/count'),
     generate: (noteId: string, selectedText?: string) =>
       apiCall<Array<{ question: string; answer: string }>>('/api/v1/flashcards/generate', {
         method: 'POST',
@@ -125,10 +136,25 @@ export const api = {
   },
   study: {
     due: (noteId?: string) => apiCall<Flashcard[]>(`/api/v1/study/due${noteId ? `?note_id=${noteId}` : ''}`),
-    review: (flashcardId: string, correct: boolean) =>
+    dailyQueue: () => apiCall<Flashcard[]>('/api/v1/study/daily-queue'),
+    dueCount: () => apiCall<{ count: number }>('/api/v1/study/due-count'),
+    review: (cardId: string, rating: 'hard' | 'ok' | 'easy') =>
       apiCall<Flashcard>('/api/v1/study/review', {
         method: 'POST',
-        body: JSON.stringify({ flashcard_id: flashcardId, correct }),
+        body: JSON.stringify({ card_id: cardId, rating }),
+      }),
+    session: (data: { hard_count: number; ok_count: number; easy_count: number }) =>
+      apiCall<{ streak_count: number; cards_reviewed: number; accuracy: number }>('/api/v1/study/session', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+  },
+  profiles: {
+    me: () => apiCall<Profile>('/api/v1/profiles/me'),
+    update: (data: { daily_review_limit?: number; email_notifications_enabled?: boolean; display_name?: string }) =>
+      apiCall<Profile>('/api/v1/profiles/me', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
       }),
   },
 }
