@@ -20,7 +20,7 @@ study.get('/due', async (c) => {
     .from('flashcards')
     .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, created_at, notes ( title )')
     .eq('user_id', userId)
-    .lte('next_review_at', new Date().toISOString())
+    .or(`next_review_at.lte.${new Date().toISOString()},next_review_at.is.null`)
 
   if (noteId) {
     query = query.eq('note_id', noteId)
@@ -46,7 +46,7 @@ study.post('/review', zValidator('json', reviewSchema), async (c) => {
 
   const { data: flashcard, error: fetchError } = await supabase
     .from('flashcards')
-    .select('id, interval_days, ease_factor, repetitions, times_reviewed, times_correct')
+    .select('id, interval_days, ease_factor, repetitions')
     .eq('id', card_id)
     .eq('user_id', userId)
     .single()
@@ -71,9 +71,7 @@ study.post('/review', zValidator('json', reviewSchema), async (c) => {
       interval_days,
       ease_factor,
       repetitions,
-      next_review_at: next_review_at.toISOString(),
-      times_reviewed: (flashcard.times_reviewed || 0) + 1,
-      times_correct: (flashcard.times_correct || 0) + (isCorrect ? 1 : 0)
+      next_review_at: next_review_at.toISOString()
     })
     .eq('id', card_id)
     .eq('user_id', userId)
@@ -89,6 +87,7 @@ study.post('/review', zValidator('json', reviewSchema), async (c) => {
 
 study.get('/daily-queue', async (c) => {
   const userId = c.get('userId')
+  const isOvertime = c.req.query('overtime') === 'true'
 
   // Fetch daily_review_limit
   const { data: profile } = await supabase
@@ -99,12 +98,17 @@ study.get('/daily-queue', async (c) => {
     
   const limit = profile?.daily_review_limit || 5
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('flashcards')
     .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, repetitions, created_at, notes ( title )')
     .eq('user_id', userId)
-    .lte('next_review_at', new Date().toISOString())
-    .order('next_review_at', { ascending: true })
+
+  if (!isOvertime) {
+    query = query.or(`next_review_at.lte.${new Date().toISOString()},next_review_at.is.null`)
+  }
+
+  const { data, error } = await query
+    .order('next_review_at', { ascending: true }) // nulls will be treated according to Postgres defaults, usually last, which is fine
     .limit(limit)
 
   if (error) {
@@ -124,7 +128,7 @@ study.get('/due-count', async (c) => {
     .from('flashcards')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .lte('next_review_at', new Date().toISOString())
+    .or(`next_review_at.lte.${new Date().toISOString()},next_review_at.is.null`)
 
   if (error) {
     return c.json({ error: error.message }, 500)

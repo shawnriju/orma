@@ -16,6 +16,8 @@ export default function DailyReviewPage() {
   
   const [pageState, setPageState] = useState<PageState>('loading')
   const [queue, setQueue] = useState<Flashcard[]>([])
+  const [isOvertime, setIsOvertime] = useState(false)
+  const [showOvertimeWarning, setShowOvertimeWarning] = useState(false)
   
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
@@ -27,11 +29,11 @@ export default function DailyReviewPage() {
   const [dueCountAll, setDueCountAll] = useState(0)
   const [totalCards, setTotalCards] = useState(0)
 
-  const fetchInitialData = useCallback(async () => {
+  const fetchInitialData = useCallback(async (overtime = false) => {
     setPageState('loading')
     try {
       const [dueQueue, totalCountData] = await Promise.all([
-        api.study.dailyQueue(),
+        api.study.dailyQueue(overtime),
         api.flashcards.count()
       ])
       
@@ -53,8 +55,8 @@ export default function DailyReviewPage() {
   }, [])
 
   useEffect(() => {
-    fetchInitialData()
-  }, [fetchInitialData])
+    fetchInitialData(isOvertime)
+  }, [fetchInitialData, isOvertime])
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -175,14 +177,53 @@ export default function DailyReviewPage() {
               </p>
             </div>
 
-            <button
-              onClick={() => router.push('/study')}
-              className="mt-4 px-6 py-3 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm"
-            >
-              Study anyway →
-            </button>
+            <div className="flex flex-col gap-3 w-full mt-4 max-w-sm mx-auto">
+              <button
+                onClick={() => setShowOvertimeWarning(true)}
+                className="w-full py-3.5 bg-[#f5ece7] hover:bg-[#e1d8d4] text-[#54433d] font-semibold rounded-2xl transition-all shadow-sm flex items-center justify-center"
+              >
+                Study More (Overtime)
+              </button>
+              <button
+                onClick={() => router.push('/study')}
+                className="w-full py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm"
+              >
+                Free Study →
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Overtime Confirmation Modal */}
+        {showOvertimeWarning && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="max-w-sm w-full bg-white rounded-[2rem] border border-[#dac1b9]/40 p-6 flex flex-col gap-4 shadow-xl text-center">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-[#1e1b18]">Start Overtime Session?</h3>
+                <p className="text-xs text-[#87736c] mt-2 leading-relaxed">
+                  You have completed your daily review. Further attempts will fetch future cards and affect their scheduling. Are you sure you want to proceed?
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <button
+                  onClick={() => setShowOvertimeWarning(false)}
+                  className="py-2.5 bg-[#f5ece7] text-[#87736c] hover:bg-[#e1d8d4] font-semibold rounded-xl text-xs transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowOvertimeWarning(false)
+                    setIsOvertime(true)
+                  }}
+                  className="py-2.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-xl text-xs transition-all"
+                >
+                  Proceed
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -234,7 +275,7 @@ export default function DailyReviewPage() {
 
             <div className="flex flex-col gap-3 w-full mt-4">
               <button
-                onClick={() => fetchInitialData()}
+                onClick={() => fetchInitialData(isOvertime)}
                 className="w-full py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm flex items-center justify-center"
               >
                 Try another session

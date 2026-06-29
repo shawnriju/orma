@@ -14,8 +14,10 @@ import notebooks from './routes/notebooks.js'
 import flashcards from './routes/flashcards.js'
 import study from './routes/study.js'
 import profiles from './routes/profiles.js'
+import { serve as serveInngest } from 'inngest/hono'
+import { inngest } from './inngest/client.js'
+import { dailyEmailAlert } from './inngest/functions.js'
 
-// import study from './routes/study.js'
 // import backup from './routes/backup.js'
 
 const app = new Hono()
@@ -29,6 +31,9 @@ app.use('*', cors({
 
 // Health check endpoint
 app.get('/health', (c) => c.json({ status: 'ok' }))
+
+// Inngest route (must be unauthenticated so Inngest cloud can hit it)
+app.on(['GET', 'POST', 'PUT'], '/api/inngest', serveInngest({ client: inngest, functions: [dailyEmailAlert] }))
 
 // Auth middleware mounted on all API v1 routes
 app.use('/api/v1/*', authMiddleware)

@@ -63,3 +63,23 @@
   - Created `apps/web/app/(workspace)/daily-review/page.tsx` with comprehensive states (`loading`, `start`, `empty`, `reviewing`, `complete`).
   - Implemented interval hint previews ("Tomorrow", "~3 days") under rating buttons dynamically populated by the SM-2 utility.
   - Added session completion feedback with streak tracking and an accuracy score to motivate consistency.
+- **Settings & User Preferences**:
+  - Implemented end-to-end flow in `apps/web/app/(workspace)/settings/page.tsx` to update `daily_review_limit` and `email_notifications_enabled`.
+  - Backend dynamically uses `daily_review_limit` to restrict the Daily Review queue.
+- **Study Screen Refactor**:
+  - Transformed `/app/(workspace)/study/page.tsx` into a free-form flashcard browser.
+  - Groups all flashcards by note, with expandable inline answers and "Study Note" capabilities.
+  - Free-form study completely decoupled from SRS (no longer hits `/study/review` API).
+- **Background Jobs (Inngest)**:
+  - Installed and configured Inngest in `apps/api`.
+  - Created `dailyEmailAlert` cron function using Supabase Service Role to query opted-in users and due cards.
+  - Mounted `/api/inngest` endpoint using Hono adapter for execution.
+
+### 10. Study & Review Refinements
+- **Inngest Configuration Fix**: Corrected the `createFunction` syntax in the background job to properly nest cron triggers inside the config object, resolving SDK initialization crashes.
+- **SRS Database Query Fix**: Updated the `/daily-queue` and `/due-count` queries to include older flashcards that had a `null` value for `next_review_at` by using a `.or()` condition.
+- **Overtime Daily Review Mode**: 
+  - Added an `overtime=true` query parameter to the `/daily-queue` route to bypass time filters and fetch future due cards.
+  - Added an "Overtime" study option to the Daily Review empty state.
+  - Implemented a modal warning letting users know that overtime sessions actively alter their spaced repetition schedules.
+- **Free Study UI Cleanup**: Removed the tracking tags from the free-form Study browser to  decouple it from spaced repetition logic for now(future scope to have some sort of tracking on the free study page), and configured note group headers to be collapsed by default for easier navigation.

@@ -19,7 +19,7 @@ flashcards.get('/', async (c) => {
 
   let query = supabase
     .from('flashcards')
-    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, created_at, notes ( title )')
+    .select('id, note_id, question, answer, next_review_at, interval_days, ease_factor, repetitions, created_at, notes ( title )')
     .eq('user_id', userId)
 
   if (noteId) {

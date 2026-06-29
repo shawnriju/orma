@@ -136,7 +136,7 @@ export const api = {
   },
   study: {
     due: (noteId?: string) => apiCall<Flashcard[]>(`/api/v1/study/due${noteId ? `?note_id=${noteId}` : ''}`),
-    dailyQueue: () => apiCall<Flashcard[]>('/api/v1/study/daily-queue'),
+    dailyQueue: (overtime?: boolean) => apiCall<Flashcard[]>(`/api/v1/study/daily-queue${overtime ? '?overtime=true' : ''}`),
     dueCount: () => apiCall<{ count: number }>('/api/v1/study/due-count'),
     review: (cardId: string, rating: 'hard' | 'ok' | 'easy') =>
       apiCall<Flashcard>('/api/v1/study/review', {
