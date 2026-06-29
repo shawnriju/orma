@@ -7,6 +7,7 @@ import { api, Flashcard } from '../../../lib/api'
 import { previewIntervals, Rating } from '../../../lib/sm2'
 import EditFlashcardModal from '../../../components/flashcards/EditFlashcardModal'
 import { useQueryClient } from '@tanstack/react-query'
+import styles from '../workspace.module.css'
 
 type PageState = 'loading' | 'start' | 'empty' | 'reviewing' | 'complete'
 
@@ -118,36 +119,36 @@ export default function DailyReviewPage() {
 
   if (pageState === 'loading') {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0 justify-center items-center">
-        <Loader2 className="w-8 h-8 text-[#d67d5c] animate-spin" />
-        <div className="text-center py-4 text-sm text-[#87736c]">Loading your daily review...</div>
+      <div className={styles.workspacePageLoading}>
+        <Loader2 className={styles.workspaceMainToggleIcon} />
+        <div className={styles.workspaceEmptyText}>Loading your daily review...</div>
       </div>
     )
   }
 
   if (pageState === 'start') {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0">
+      <div className={styles.workspaceDailyWrap}>
         <header className="mb-8">
-          <h1 className="font-serif font-bold text-3xl text-[#94492c]">Daily Review</h1>
-          <p className="text-sm text-[#87736c] mt-1">Strengthen your memory with spaced repetition</p>
+          <h1 className={styles.workspaceStudyHeaderTitle}>Daily Review</h1>
+          <p className={styles.workspaceStudyHeaderText}>Strengthen your memory with spaced repetition</p>
         </header>
-        <div className="flex-1 flex items-center justify-center py-12">
-           <div className="bg-[#fff8f5] border border-[#dac1b9]/40 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6 max-w-2xl w-full">
-            <div className="w-16 h-16 bg-[#d67d5c] rounded-3xl flex items-center justify-center text-[#fff]">
-              <Clock className="w-8 h-8" />
+        <div className={styles.workspaceDailyHero}>
+           <div className={styles.workspaceDailyCard}>
+            <div className={styles.workspaceEmptyIcon}>
+              <Clock className={styles.workspaceNavIcon} />
             </div>
 
             <div>
-              <h2 className="font-serif font-bold text-2xl text-[#1e1b18]">Ready to study?</h2>
-              <p className="text-sm text-[#87736c] mt-2 leading-relaxed max-w-md">
+              <h2 className={styles.workspaceEmptyTitle}>Ready to study?</h2>
+              <p className={styles.workspaceEmptyText}>
                 Out of the total {totalCards} cards created, these are the {queue.length} selected for your daily review session.
               </p>
             </div>
 
             <button
               onClick={() => setPageState('reviewing')}
-              className="mt-4 w-full py-4 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm flex justify-center items-center gap-2"
+              className={styles.workspaceButtonPrimary}
             >
               Start Daily Review
             </button>
@@ -159,20 +160,20 @@ export default function DailyReviewPage() {
 
   if (pageState === 'empty') {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0">
+      <div className={styles.workspaceDailyWrap}>
         <header className="mb-8">
-          <h1 className="font-serif font-bold text-3xl text-[#94492c]">Daily Review</h1>
-          <p className="text-sm text-[#87736c] mt-1">Strengthen your memory with spaced repetition</p>
+          <h1 className={styles.workspaceStudyHeaderTitle}>Daily Review</h1>
+          <p className={styles.workspaceStudyHeaderText}>Strengthen your memory with spaced repetition</p>
         </header>
-        <div className="flex-1 flex items-center justify-center py-12">
-           <div className="bg-[#fff8f5] border border-[#dac1b9]/40 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6 max-w-2xl w-full">
-            <div className="w-16 h-16 bg-[#d3e8d1] rounded-3xl flex items-center justify-center text-[#0e1f11]">
-              <CheckCircle2 className="w-8 h-8" />
+        <div className={styles.workspaceDailyHero}>
+           <div className={styles.workspaceDailyCard}>
+            <div className={styles.workspaceEmptyIcon}>
+              <CheckCircle2 className={styles.workspaceNavIcon} />
             </div>
 
             <div>
-              <h2 className="font-serif font-bold text-2xl text-[#1e1b18]">You're all caught up ✓</h2>
-              <p className="text-sm text-[#87736c] mt-2 leading-relaxed">
+              <h2 className={styles.workspaceEmptyTitle}>You're all caught up ✓</h2>
+              <p className={styles.workspaceEmptyText}>
                 You have 0 cards due for today.
               </p>
             </div>
@@ -180,13 +181,13 @@ export default function DailyReviewPage() {
             <div className="flex flex-col gap-3 w-full mt-4 max-w-sm mx-auto">
               <button
                 onClick={() => setShowOvertimeWarning(true)}
-                className="w-full py-3.5 bg-[#f5ece7] hover:bg-[#e1d8d4] text-[#54433d] font-semibold rounded-2xl transition-all shadow-sm flex items-center justify-center"
+                className={styles.workspaceButtonSecondary}
               >
                 Study More (Overtime)
               </button>
               <button
                 onClick={() => router.push('/study')}
-                className="w-full py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm"
+                className={styles.workspaceButtonPrimary}
               >
                 Free Study →
               </button>
@@ -196,18 +197,18 @@ export default function DailyReviewPage() {
 
         {/* Overtime Confirmation Modal */}
         {showOvertimeWarning && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="max-w-sm w-full bg-white rounded-[2rem] border border-[#dac1b9]/40 p-6 flex flex-col gap-4 shadow-xl text-center">
+          <div className={styles.workspaceModalOverlay}>
+            <div className={styles.workspaceModal}>
               <div>
-                <h3 className="font-serif font-bold text-lg text-[#1e1b18]">Start Overtime Session?</h3>
-                <p className="text-xs text-[#87736c] mt-2 leading-relaxed">
+                <h3 className={styles.workspaceModalTitle}>Start Overtime Session?</h3>
+                <p className={styles.workspaceModalText}>
                   You have completed your daily review. Further attempts will fetch future cards and affect their scheduling. Are you sure you want to proceed?
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <button
                   onClick={() => setShowOvertimeWarning(false)}
-                  className="py-2.5 bg-[#f5ece7] text-[#87736c] hover:bg-[#e1d8d4] font-semibold rounded-xl text-xs transition-all"
+                  className={styles.workspaceButtonSecondary}
                 >
                   Cancel
                 </button>
@@ -216,7 +217,7 @@ export default function DailyReviewPage() {
                     setShowOvertimeWarning(false)
                     setIsOvertime(true)
                   }}
-                  className="py-2.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-xl text-xs transition-all"
+                  className={styles.workspaceButtonPrimary}
                 >
                   Proceed
                 </button>
@@ -232,38 +233,38 @@ export default function DailyReviewPage() {
     const total = sessionStats.hard + sessionStats.ok + sessionStats.easy
     const accuracy = total > 0 ? Math.round(((sessionStats.ok + sessionStats.easy) / total) * 100) : 0
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0 relative justify-center items-center">
-         <div className="max-w-md w-full bg-[#fff8f5] border border-[#dac1b9]/40 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6">
+      <div className={styles.workspaceDailyWrap}>
+         <div className={styles.workspaceDailyCard}>
             {streakCount > 0 && (
-              <div className="bg-[#fff3e0] text-[#e65100] text-sm font-bold px-4 py-1.5 rounded-full border border-[#ffe0b2] shadow-sm mb-2">
+              <div className={styles.workspaceDailyBadge}>
                 🔥 {streakCount}-day streak
               </div>
             )}
             
-            <div className="w-20 h-20 bg-[#d3e8d1] rounded-full flex items-center justify-center text-[#0e1f11]">
-              <CheckCircle2 className="w-10 h-10 text-[#506351]" />
+            <div className={styles.workspaceEmptyIcon}>
+              <CheckCircle2 className={styles.workspaceNavIcon} />
             </div>
 
             <div>
-              <h2 className="font-serif font-bold text-3xl text-[#1e1b18]">Great job!</h2>
-              <p className="text-sm text-[#87736c] mt-2 leading-relaxed">
+              <h2 className={styles.workspaceStudyHeaderTitle}>Great job!</h2>
+              <p className={styles.workspaceEmptyText}>
                 You finished your daily study session.
               </p>
-              <div className="mt-2 inline-block bg-[#f5ece7] px-3 py-1 rounded-full text-xs font-semibold text-[#54433d] border border-[#dac1b9]/30">
+              <div className={styles.workspaceStudyMetaChip}>
                 {totalCards} total cards saved
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 w-full mt-2">
-              <div className="bg-[#fff] border border-[#dac1b9]/20 rounded-2xl p-3">
+            <div className={styles.workspaceDailyStatGrid}>
+              <div className={styles.workspaceDailyStatCard}>
                 <div className="text-lg font-bold text-[#ba1a1a]">{sessionStats.hard}</div>
                 <div className="text-[10px] text-[#87736c] font-medium uppercase tracking-wider mt-1">Hard</div>
               </div>
-              <div className="bg-[#fff] border border-[#dac1b9]/20 rounded-2xl p-3">
+              <div className={styles.workspaceDailyStatCard}>
                 <div className="text-lg font-bold text-[#f59e0b]">{sessionStats.ok}</div>
                 <div className="text-[10px] text-[#87736c] font-medium uppercase tracking-wider mt-1">OK</div>
               </div>
-              <div className="bg-[#fff] border border-[#dac1b9]/20 rounded-2xl p-3">
+              <div className={styles.workspaceDailyStatCard}>
                 <div className="text-lg font-bold text-[#506351]">{sessionStats.easy}</div>
                 <div className="text-[10px] text-[#87736c] font-medium uppercase tracking-wider mt-1">Easy</div>
               </div>
@@ -274,22 +275,19 @@ export default function DailyReviewPage() {
             </div>
 
             <div className="flex flex-col gap-3 w-full mt-4">
-              <button
-                onClick={() => fetchInitialData(isOvertime)}
-                className="w-full py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm flex items-center justify-center"
-              >
+              <button onClick={() => fetchInitialData(isOvertime)} className={styles.workspaceButtonPrimary}>
                 Try another session
               </button>
               <div className="flex gap-3 w-full">
                 <button
                   onClick={() => router.push('/notes')}
-                  className="flex-1 py-3 bg-[#f5ece7] hover:bg-[#e1d8d4] text-[#54433d] font-semibold rounded-xl transition-all shadow-sm flex items-center justify-center text-sm"
+                  className={styles.workspaceButtonSecondary}
                 >
                   Back to notes
                 </button>
                 <button
                   onClick={() => router.push('/study')}
-                  className="flex-1 py-3 bg-[#f5ece7] hover:bg-[#e1d8d4] text-[#54433d] font-semibold rounded-xl transition-all shadow-sm flex items-center justify-center text-sm"
+                  className={styles.workspaceButtonSecondary}
                 >
                   Free Study
                 </button>
@@ -310,17 +308,17 @@ export default function DailyReviewPage() {
   const intervals = previewIntervals(cardState)
 
   return (
-    <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-6 md:p-8 min-h-0 relative">
-      <header className="mb-4 flex items-center gap-4 shrink-0">
+    <div className={styles.workspaceDailyWrap}>
+      <header className={styles.workspaceStudyHeader}>
         <button
           onClick={() => router.push('/study')}
-          className="p-2 hover:bg-[#f5ece7] text-[#87736c] hover:text-[#94492c] rounded-xl transition-all"
+          className={styles.workspaceMainToggle}
           title="Exit Session"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className={styles.workspaceMainToggleIcon} />
         </button>
         <div>
-          <h1 className="font-serif font-bold text-2xl text-[#94492c]">Daily Review</h1>
+          <h1 className={styles.workspaceStudyHeaderTitle}>Daily Review</h1>
         </div>
       </header>
 

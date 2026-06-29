@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { FileText, Search, Plus, Sparkles, AlertCircle, MoreVertical, Edit3, Trash2 } from 'lucide-react'
 import { api, Note } from '../../../lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import styles from '../workspace.module.css'
 
 export default function NotesPage() {
   const router = useRouter()
@@ -124,84 +125,84 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden">
+    <div className={styles.workspacePage}>
       {/* Header */}
-      <header className="h-16 border-b border-[#dac1b9]/30 pr-8 pl-16 flex items-center justify-between">
-        <h1 className="font-serif font-bold text-xl text-[#94492c]">My Notes</h1>
-        <div className="flex items-center gap-4 w-72 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-xl px-3 py-1.5 focus-within:border-[#d67d5c] transition-all">
-          <Search className="w-4 h-4 text-[#87736c]" />
+      <header className={styles.workspaceHeaderCompact}>
+        <h1 className={styles.workspaceHeaderTitle}>My Notes</h1>
+        <div className={styles.workspaceHeaderSearch}>
+          <Search className={styles.workspaceNavIcon} />
           <input
             type="text"
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-xs outline-none text-[#1e1b18] w-full"
+            className={styles.workspaceHeaderSearchInput}
           />
         </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className={styles.workspaceContent}>
         {isLoading ? (
-          <div className="text-sm text-[#87736c] text-center py-12">Loading notes...</div>
+          <div className={styles.workspacePageLoading}>Loading notes...</div>
         ) : error ? (
-          <div className="text-sm text-[#ba1a1a] text-center py-12 flex items-center justify-center gap-2">
-            <AlertCircle className="w-4 h-4" />
+          <div className={styles.workspaceErrorState}>
+            <AlertCircle className={styles.workspaceMainToggleIcon} />
             <span>Could not fetch notes. Make sure backend is running.</span>
           </div>
         ) : filteredNotes.length === 0 ? (
-          <div className="max-w-md mx-auto text-center py-20 flex flex-col items-center gap-4">
-            <div className="w-16 h-16 bg-[#f5ece7] rounded-3xl flex items-center justify-center text-[#94492c]">
-              <FileText className="w-8 h-8" />
+          <div className={styles.workspaceEmptyState}>
+            <div className={styles.workspaceEmptyIcon}>
+              <FileText className={styles.workspaceNavIcon} />
             </div>
             <div>
-              <h3 className="font-semibold text-lg text-[#1e1b18]">No notes found</h3>
-              <p className="text-sm text-[#87736c] mt-1 leading-relaxed">
+              <h3 className={styles.workspaceEmptyTitle}>No notes found</h3>
+              <p className={styles.workspaceEmptyText}>
                 Create your first note to start writing, planning, and studying.
               </p>
             </div>
             <button
               onClick={handleCreateNote}
-              className="mt-4 px-8 py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white text-base font-bold rounded-2xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-2 group"
+              className={styles.workspaceButtonPrimary}
             >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+              <Plus className={styles.workspaceNavIcon} />
               <span>Create Your First Note</span>
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={styles.workspaceNoteGrid}>
             {filteredNotes.map((note: Note) => (
               <div
                 key={note.id}
                 onClick={() => router.push(`/notes/${note.id}`)}
-                className="p-6 bg-[#fff8f5] border border-[#dac1b9]/30 rounded-3xl hover:border-[#d67d5c] hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between gap-4 group relative"
+                className={styles.workspaceNoteCard}
               >
                 <div>
                   <div className="flex justify-between items-start">
-                    <h3 className="font-semibold text-base text-[#1e1b18] group-hover:text-[#94492c] transition-colors line-clamp-1 pr-6 flex-1">
+                    <h3 className={`${styles.workspaceNoteCardTitle} ${styles.workspaceNoteCardTitleHover}`}>
                       {note.title || 'Untitled Note'}
                     </h3>
-                    <div className="absolute top-5 right-5 z-10">
+                    <div className={styles.workspaceNoteMenuWrap}>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           setActiveMenuNoteId(activeMenuNoteId === note.id ? null : note.id)
                         }}
-                        className="p-1 hover:bg-[#f5ece7] rounded-lg transition-all text-[#87736c] hover:text-[#94492c]"
+                        className={styles.workspaceNoteMenuButton}
                       >
-                        <MoreVertical className="w-4 h-4" />
+                        <MoreVertical className={styles.workspaceNavIcon} />
                       </button>
                       {activeMenuNoteId === note.id && (
-                        <div className="absolute right-0 mt-1 w-36 bg-white border border-[#dac1b9]/40 rounded-xl shadow-lg py-1 text-xs text-[#54433d] z-20">
+                        <div className={styles.workspaceNoteMenu}>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               setActiveMenuNoteId(null)
                               handleRename(note.id, note.title)
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-[#fff8f5] hover:text-[#94492c] flex items-center gap-2"
+                            className={styles.workspaceNoteMenuItem}
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
+                            <Edit3 className={styles.workspaceNavIcon} />
                             <span>Rename</span>
                           </button>
                           <button
@@ -210,20 +211,20 @@ export default function NotesPage() {
                               setActiveMenuNoteId(null)
                               handleDelete(note.id)
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-[#ffdad6]/30 text-[#ba1a1a] flex items-center gap-2"
+                            className={`${styles.workspaceNoteMenuItem} ${styles.workspaceNoteMenuDanger}`}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className={styles.workspaceNavIcon} />
                             <span>Delete</span>
                           </button>
                         </div>
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-[#87736c] mt-2 line-clamp-3 leading-relaxed">
+                  <p className={styles.workspaceNotePreview}>
                     {getNotePreview(note.content)}
                   </p>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-[#dac1b9]/20 text-[11px] text-[#87736c] font-medium">
+                <div className={styles.workspaceNoteCardMeta}>
                   <span>{note.word_count || 0} words</span>
                   <span>{note.updated_at ? new Date(note.updated_at).toLocaleDateString() : ''}</span>
                 </div>

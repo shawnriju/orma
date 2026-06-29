@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { api, Flashcard } from '../../../lib/api'
 import EditFlashcardModal from '../../../components/flashcards/EditFlashcardModal'
+import styles from '../workspace.module.css'
 
 function StudyDashboard() {
   const router = useRouter()
@@ -120,23 +121,23 @@ function StudyDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0 justify-center items-center">
-        <Loader2 className="w-8 h-8 text-[#d67d5c] animate-spin" />
-        <div className="text-center py-4 text-sm text-[#87736c]">Loading your cards...</div>
+      <div className={styles.workspacePageLoading}>
+        <Loader2 className={styles.workspaceMainToggleIcon} />
+        <div className={styles.workspaceEmptyText}>Loading your cards...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0 justify-center items-center">
-        <div className="max-w-md mx-auto text-center py-10 flex flex-col items-center gap-4">
-          <div className="w-16 h-16 bg-[#ffdad6] rounded-3xl flex items-center justify-center text-[#ba1a1a]">
-            <AlertCircle className="w-8 h-8" />
+      <div className={styles.workspacePageLoading}>
+        <div className={styles.workspaceEmptyState}>
+          <div className={styles.workspaceEmptyIcon}>
+            <AlertCircle className={styles.workspaceNavIcon} />
           </div>
           <div>
-            <h2 className="font-serif font-bold text-2xl text-[#1e1b18]">Could not load review cards</h2>
-            <p className="text-sm text-[#87736c] mt-2 leading-relaxed max-w-md">
+            <h2 className={styles.workspaceEmptyTitle}>Could not load review cards</h2>
+            <p className={styles.workspaceEmptyText}>
               Make sure the backend is running and the study API is available.
             </p>
           </div>
@@ -150,18 +151,18 @@ function StudyDashboard() {
     const currentCard = sessionCards[currentCardIndex]
 
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-6 md:p-8 min-h-0 relative">
-        <header className="mb-4 flex items-center gap-4 shrink-0">
+      <div className={styles.workspaceStudyShell}>
+        <header className={styles.workspaceStudyHeader}>
           <button
             onClick={() => setShowExitModal(true)}
-            className="p-2 hover:bg-[#f5ece7] text-[#87736c] hover:text-[#94492c] rounded-xl transition-all"
+            className={styles.workspaceMainToggle}
             title="Exit Session"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className={styles.workspaceMainToggleIcon} />
           </button>
           <div>
-            <h1 className="font-serif font-bold text-2xl text-[#94492c]">Free Study Session</h1>
-            <p className="text-xs text-[#87736c] mt-0.5">
+            <h1 className={styles.workspaceStudyHeaderTitle}>Free Study Session</h1>
+            <p className={styles.workspaceStudyHeaderText}>
               Reviewing {activeSession === 'all' ? 'All Cards' : 'selected note'}
             </p>
           </div>
@@ -170,14 +171,14 @@ function StudyDashboard() {
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center py-2">
           <div className="w-full max-w-2xl flex flex-col items-center gap-6">
             {/* Progress Indicator */}
-            <div className="w-full max-w-xl">
-              <div className="flex justify-between text-xs font-semibold text-[#87736c] mb-2 uppercase tracking-wider">
+            <div className={styles.workspaceStudyProgressWrap}>
+              <div className={styles.workspaceProgressLabel}>
                 <span>Progress</span>
                 <span>{currentCardIndex + 1} of {sessionCards.length}</span>
               </div>
-              <div className="w-full h-2 bg-[#f5ece7] rounded-full overflow-hidden">
+              <div className={styles.workspaceProgressTrack}>
                 <div
-                  className="h-full bg-[#d67d5c] transition-all duration-300"
+                  className={styles.workspaceProgressFill}
                   style={{ width: `${((currentCardIndex) / sessionCards.length) * 100}%` }}
                 />
               </div>
@@ -192,20 +193,20 @@ function StudyDashboard() {
                   setIsFlipped(false)
                   setCurrentCardIndex(prev => Math.max(0, prev - 1))
                 }}
-                className="p-3 rounded-full bg-white hover:bg-[#fff8f5] border border-[#dac1b9]/40 text-[#87736c] hover:text-[#94492c] transition-all disabled:opacity-30 disabled:pointer-events-none shadow-sm shrink-0"
+                className={styles.workspaceMainToggle}
                 title="Previous Card"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className={styles.workspaceMainToggleIcon} />
               </button>
 
               {/* 3D Flip Card */}
               <div
                 onClick={() => setIsFlipped(!isFlipped)}
-                className="flex-1 max-w-xl aspect-[4/3] max-h-[380px] cursor-pointer"
+                className={styles.workspaceStudyCardButton}
                 style={{ perspective: '1000px' }}
               >
                 <div
-                  className="relative w-full h-full transition-transform duration-500"
+                  className={styles.workspaceStudyFlipStage}
                   style={{
                     transformStyle: 'preserve-3d',
                     transform: isFlipped ? 'rotateY(180deg)' : 'none',
@@ -213,7 +214,7 @@ function StudyDashboard() {
                 >
                   {/* Front Side */}
                   <div
-                    className="absolute inset-0 w-full h-full bg-white border border-[#dac1b9]/50 rounded-[2.5rem] p-8 md:p-10 flex flex-col justify-between shadow-sm"
+                    className={styles.workspaceStudyCardFront}
                     style={{
                       backfaceVisibility: 'hidden',
                     }}
@@ -221,9 +222,9 @@ function StudyDashboard() {
                     <div className="flex justify-between items-center gap-4">
                       {currentCard?.notes?.title && (
                         <div
-                          className="flex items-center gap-1.5 px-3 py-1 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-full font-semibold text-xs text-[#94492c] max-w-[220px] truncate shadow-sm"
+                          className={styles.workspaceStudyMetaChip}
                         >
-                          <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
+                          <BookOpen className={styles.workspaceNavIcon} />
                           <span>{currentCard.notes.title}</span>
                         </div>
                       )}
@@ -233,27 +234,27 @@ function StudyDashboard() {
                             e.stopPropagation()
                             setEditingCard(currentCard)
                           }}
-                          className="p-1.5 rounded-full hover:bg-[#fff8f5] border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
+                          className={styles.workspaceMainToggle}
                           title="Edit Card"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className={styles.workspaceMainToggleIcon} />
                         </button>
                       </div>
                     </div>
                     <div className="flex-1 flex items-center justify-center py-4">
-                      <p className="font-serif font-semibold text-xl md:text-2xl text-[#1e1b18] text-center leading-relaxed">
+                      <p className={styles.workspaceEmptyTitle}>
                         {currentCard?.question}
                       </p>
                     </div>
-                    <div className="text-center text-xs text-[#87736c] font-medium flex items-center justify-center gap-1.5 opacity-60">
-                      <RotateCw className="w-3.5 h-3.5" />
+                    <div className={styles.workspaceEmptyText}>
+                      <RotateCw className={styles.workspaceMainToggleIcon} />
                       <span>Tap card to reveal answer</span>
                     </div>
                   </div>
 
                   {/* Back Side */}
                   <div
-                    className="absolute inset-0 w-full h-full bg-[#fff8f5] border-2 border-[#d67d5c]/40 rounded-[2.5rem] p-8 md:p-10 flex flex-col justify-between shadow-sm"
+                    className={styles.workspaceStudyCardBack}
                     style={{
                       backfaceVisibility: 'hidden',
                       transform: 'rotateY(180deg)',
@@ -262,9 +263,9 @@ function StudyDashboard() {
                     <div className="flex justify-between items-center gap-4">
                       {currentCard?.notes?.title && (
                         <div
-                          className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#dac1b9]/40 rounded-full font-semibold text-xs text-[#94492c] max-w-[220px] truncate shadow-sm"
+                          className={styles.workspaceStudyMetaChip}
                         >
-                          <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
+                          <BookOpen className={styles.workspaceNavIcon} />
                           <span>{currentCard.notes.title}</span>
                         </div>
                       )}
@@ -274,20 +275,20 @@ function StudyDashboard() {
                             e.stopPropagation()
                             setEditingCard(currentCard)
                           }}
-                          className="p-1.5 rounded-full hover:bg-white border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
+                          className={styles.workspaceMainToggle}
                           title="Edit Card"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className={styles.workspaceMainToggleIcon} />
                         </button>
                       </div>
                     </div>
                     <div className="flex-1 flex items-center justify-center py-4 overflow-y-auto">
-                      <p className="font-medium text-lg md:text-xl text-[#54433d] text-center leading-relaxed">
+                      <p className={styles.workspaceEmptyText}>
                         {currentCard?.answer}
                       </p>
                     </div>
-                    <div className="text-center text-xs text-[#87736c] font-medium flex items-center justify-center gap-1.5 opacity-60">
-                      <RotateCw className="w-3.5 h-3.5" />
+                    <div className={styles.workspaceEmptyText}>
+                      <RotateCw className={styles.workspaceMainToggleIcon} />
                       <span>Tap to flip back</span>
                     </div>
                   </div>
@@ -309,11 +310,11 @@ function StudyDashboard() {
             </div>
 
             {/* Action Buttons */}
-            <div className="w-full max-w-xl flex flex-col items-center gap-3">
+            <div className={styles.workspaceStudyActionRow}>
               {!isFlipped ? (
                 <button
                   onClick={() => setIsFlipped(true)}
-                  className="w-full py-4 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm text-sm"
+                  className={styles.workspaceButtonPrimary}
                 >
                   Show Answer
                 </button>
@@ -321,7 +322,7 @@ function StudyDashboard() {
                 <div className="w-full">
                   <button
                     onClick={handleAnswerClick}
-                    className="w-full py-4 bg-[#d3e8d1] hover:bg-[#b7ccb6] text-[#0e1f11] font-semibold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+                    className={styles.workspaceButtonPrimary}
                   >
                     <span>{currentCardIndex >= sessionCards.length - 1 ? 'Finish Session' : 'Next Card'}</span>
                     <ChevronRight className="w-4 h-4" />
@@ -334,24 +335,24 @@ function StudyDashboard() {
 
         {/* Custom Confirmation Exit Modal */}
         {showExitModal && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="max-w-sm w-full bg-white rounded-[2rem] border border-[#dac1b9]/40 p-6 flex flex-col gap-4 shadow-xl">
+          <div className={styles.workspaceModalOverlay}>
+            <div className={styles.workspaceModal}>
               <div>
-                <h3 className="font-serif font-bold text-lg text-[#1e1b18]">Exit Study Session?</h3>
-                <p className="text-xs text-[#87736c] mt-2 leading-relaxed">
+                <h3 className={styles.workspaceModalTitle}>Exit Study Session?</h3>
+                <p className={styles.workspaceModalText}>
                   Are you sure you want to leave this free-form study session?
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <button
                   onClick={() => setShowExitModal(false)}
-                  className="py-2.5 bg-[#f5ece7] text-[#87736c] hover:bg-[#e1d8d4] font-semibold rounded-xl text-xs transition-all"
+                  className={styles.workspaceButtonSecondary}
                 >
                   Stay
                 </button>
                 <button
                   onClick={confirmExit}
-                  className="py-2.5 bg-[#ba1a1a] hover:bg-[#93000a] text-white font-semibold rounded-xl text-xs transition-all"
+                  className={styles.workspaceButtonDanger}
                 >
                   Exit Session
                 </button>
@@ -372,23 +373,23 @@ function StudyDashboard() {
 
   // --- DASHBOARD VIEW (Free-form browser) ---
   return (
-    <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0 relative">
+    <div className={styles.workspaceStudyShell}>
       <header className="mb-8">
-        <h1 className="font-serif font-bold text-3xl text-[#94492c]">Study</h1>
-        <p className="text-sm text-[#87736c] mt-1">Browse all your flashcards and practice freely without affecting spaced repetition.</p>
+        <h1 className={styles.workspaceStudyHeaderTitle}>Study</h1>
+        <p className={styles.workspaceStudyHeaderText}>Browse all your flashcards and practice freely without affecting spaced repetition.</p>
       </header>
 
       <div className="flex-1 min-h-0 overflow-y-auto pr-1">
         <div className="max-w-3xl mx-auto">
           {allCards.length === 0 ? (
-            <div className="bg-[#fff8f5] border border-[#dac1b9]/40 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6 py-12">
-              <div className="w-16 h-16 bg-[#d3e8d1] rounded-3xl flex items-center justify-center text-[#0e1f11]">
-                <BookOpen className="w-8 h-8" />
+            <div className={styles.workspacePageCard}>
+              <div className={styles.workspaceEmptyIcon}>
+                <BookOpen className={styles.workspaceNavIcon} />
               </div>
 
               <div>
-                <h2 className="font-serif font-bold text-2xl text-[#1e1b18]">No Cards Yet</h2>
-                <p className="text-sm text-[#87736c] mt-2 leading-relaxed max-w-md">
+                <h2 className={styles.workspaceEmptyTitle}>No Cards Yet</h2>
+                <p className={styles.workspaceEmptyText}>
                   Create new notes and use "Magic Study" to automatically generate flashcards to see them here.
                 </p>
               </div>
@@ -398,18 +399,18 @@ function StudyDashboard() {
               {/* Study All Button */}
               <button
                 onClick={handleStartAll}
-                className="w-full text-left bg-[#fff8f5] hover:bg-[#fcf3ef] border-2 border-[#d67d5c]/30 hover:border-[#d67d5c] rounded-[2rem] p-6 shadow-sm transition-all flex items-center justify-between gap-6 group"
+                className={styles.workspacePageCard}
               >
                 <div className="flex items-center gap-5">
-                  <div className="w-12 h-12 bg-[#d67d5c] text-white rounded-2xl flex items-center justify-center shadow-sm">
-                    <Sparkles className="w-6 h-6" />
+                  <div className={styles.workspaceEmptyIcon}>
+                    <Sparkles className={styles.workspaceNavIcon} />
                   </div>
                   <div>
-                    <h3 className="font-serif font-bold text-xl text-[#1e1b18]">Study All Cards</h3>
-                    <p className="text-xs text-[#87736c] mt-1">Practice everything randomly</p>
+                    <h3 className={styles.workspaceEmptyTitle}>Study All Cards</h3>
+                    <p className={styles.workspaceEmptyText}>Practice everything randomly</p>
                   </div>
                 </div>
-                <div className="bg-[#d67d5c]/10 text-[#d67d5c] font-bold text-sm px-4 py-2 rounded-full border border-[#d67d5c]/20">
+                <div className={styles.workspaceStudyMetaChip}>
                   {allCards.length} Cards
                 </div>
               </button>
@@ -418,18 +419,18 @@ function StudyDashboard() {
                 {groupedNotes.map((note) => {
                   const isNoteExpanded = expandedNotes[note.noteId]
                   return (
-                    <div key={note.noteId} className="bg-white border border-[#dac1b9]/40 rounded-3xl overflow-hidden shadow-sm">
+                    <div key={note.noteId} className={styles.workspacePageCard}>
                       {/* Note Header */}
                       <div 
                         onClick={() => toggleNote(note.noteId)}
-                        className="bg-[#fcf3ef] p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#dac1b9]/40 cursor-pointer hover:bg-[#faeee9] transition-colors"
+                        className={styles.workspacePageCardTight}
                       >
                         <div className="flex items-center gap-3">
-                          <ChevronDown className={`w-5 h-5 text-[#94492c] transition-transform ${!isNoteExpanded ? '-rotate-90' : ''}`} />
+                          <ChevronDown className={styles.workspaceMainToggleIcon} />
                           <div>
                             <h3 className="font-semibold text-lg text-[#1e1b18]">{note.title}</h3>
                             <div className="flex items-center gap-2 mt-1.5">
-                              <span className="text-xs font-semibold text-[#87736c] bg-white px-2.5 py-1 rounded-full border border-[#dac1b9]/30">
+                              <span className={styles.workspaceStudyMetaChip}>
                                 {note.cards.length} cards
                               </span>
                             </div>
@@ -440,7 +441,7 @@ function StudyDashboard() {
                             e.stopPropagation()
                             handleStartNote(note.noteId)
                           }}
-                          className="px-5 py-2.5 bg-[#d67d5c] hover:bg-[#94492c] text-white text-sm font-semibold rounded-xl transition-all shadow-sm shrink-0"
+                          className={styles.workspaceButtonPrimary}
                         >
                           Study Note →
                         </button>

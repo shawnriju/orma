@@ -1,0 +1,81 @@
+.editorShell {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  padding: 2rem 2rem 6rem;
+  cursor: text;
+}
+
+.editorMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  color: #87736c;
+  font-size: 0.75rem;
+  user-select: none;
+  pointer-events: none;
+}
+
+.editorMetaGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editorMetaIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.editorSaving {
+  color: #94492c;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.editorSaved {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #506351;
+}
+
+.editorError {
+  color: #ba1a1a;
+}
+
+.editorTitle {
+  width: 100%;
+  margin-bottom: 1rem;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #1e1b18;
+  font-family: var(--font-literata);
+  font-size: 2.25rem;
+  font-weight: 700;
+}
+
+.editorTitle::placeholder {
+  color: #dac1b9;
+}
+
+.editorContentShell {
+  min-height: 400px;
+  cursor: text;
+}
+
+.editorContentShell :global(.ProseMirror) {
+  outline: none;
+}
+
+.editorContentShell :global(.ProseMirror h1),
+.editorContentShell :global(.ProseMirror h2),
+.editorContentShell :global(.ProseMirror h3) {
+  font-family: var(--font-literata);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
