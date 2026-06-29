@@ -1,33 +1,41 @@
 # Orma / NoteFlash
 
-Lightweight note-taking and flashcard app with a Next.js frontend and a Hono + Supabase backend.
+Orma is a lightweight notes and flashcard app with a Next.js frontend and a Hono + Supabase backend.
 
-**Quick overview**
-- **Frontend:** `apps/web` — Next.js (App Router), TypeScript, Tailwind, Zustand, TanStack Query.
-- **Backend:** `apps/api` — Hono API, Supabase service role client, OpenAI integration.
-- **Database / Auth:** Supabase (Postgres + RLS).
+## What’s in the repo
 
-**Prerequisites**
-- Node.js 18+ (recommended)
+- `apps/web` - Next.js App Router frontend with TypeScript, Tailwind, Zustand, TanStack Query, and Tiptap.
+- `apps/api` - Hono API with Supabase auth checks, Inngest jobs, and AI-backed flashcard generation.
+- `docs/` - Product, frontend, backend, and flow docs for the current MVP.
+
+## Prerequisites
+
+- Node.js 18 or newer
 - npm or pnpm
-- A Supabase project (URL + keys)
-- An OpenAI API key (for AI flashcard generation)
+- A Supabase project
+- An OpenAI API key
 
-Environment variables
-- API (create `apps/api/.env` or export env vars):
-  - `SUPABASE_URL`
-  - `SUPABASE_SERVICE_ROLE_KEY` 
-  - `OPENAI_API_KEY` 
-  - `FRONTEND_URL` (optional, defaults to `http://localhost:3000`)
-  - `PORT` (optional, defaults to `3001`)
-- Frontend (create `apps/web/.env` or export env vars):
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:3001`)
+## Environment variables
 
-Setup & run (local development)
+Create `apps/api/.env`:
 
-1. Install dependencies for each app
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `OPENAI_API_KEY`
+- `FRONTEND_URL` - optional, defaults to `http://localhost:3000`
+- `PORT` - optional, defaults to `3001`
+
+Create `apps/web/.env`:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_API_URL` - for example `http://localhost:3001`
+
+Do not commit service role keys.
+
+## Local setup
+
+Install dependencies in each app:
 
 ```powershell
 cd apps/api
@@ -37,33 +45,63 @@ cd ../web
 npm install
 ```
 
-2. Configure environment variables
-- Create `apps/api/.env` and `apps/web/.env` with the variables listed above. Do not commit service role keys.
-
-3. Run the backend (dev)
+Run the backend:
 
 ```powershell
 cd apps/api
 npm run dev
 ```
 
-The API will run on `http://localhost:3001` by default (see `PORT`).
+The API listens on `http://localhost:3001` by default.
 
-4. Run the frontend (dev)
+Run the frontend in a second terminal:
 
 ```powershell
 cd apps/web
 npm run dev
 ```
 
-The frontend runs on `http://localhost:3000` by default.
+The frontend listens on `http://localhost:3000` by default.
 
-Build & production
-- Backend: `cd apps/api && npm run build && npm run start` (builds TypeScript and runs `dist/index.js`).
-- Frontend: `cd apps/web && npm run build && npm run start`.
+## Scripts
 
-Testing
-- E2E tests are expected under `apps/web/e2e/` (Playwright). If configured, run:
+### Backend (`apps/api`)
+
+- `npm run dev` - start the API in watch mode
+- `npm run build` - compile TypeScript
+- `npm run start` - run the built server from `dist/index.js`
+
+### Frontend (`apps/web`)
+
+- `npm run dev` - start the Next.js dev server
+- `npm run build` - build the production app
+- `npm run start` - start the production app
+- `npm run lint` - run ESLint
+
+## Current app routes
+
+Frontend routes currently include:
+
+- `/` - marketing-style landing page
+- `/login`
+- `/signup`
+- `/notes`
+- `/notes/[noteId]`
+- `/study`
+- `/daily-review`
+- `/library`
+- `/settings`
+
+## Backend notes
+
+- The API exposes a `/health` endpoint.
+- Authenticated routes are mounted under `/api/v1/*`.
+- Inngest is mounted at `/api/inngest`.
+- The backend uses Supabase for auth and persistence, plus OpenAI for AI-assisted flashcard generation.
+
+## Testing
+
+Playwright E2E tests, if configured, can be run with:
 
 ```powershell
 npx playwright test
