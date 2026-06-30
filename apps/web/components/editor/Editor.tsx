@@ -6,8 +6,6 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { useEditorStore } from '../../stores/editorStore'
 import { Clock, Tag, Plus, Check } from 'lucide-react'
-import styles from './Editor.module.css'
-
 interface EditorProps {
   noteId: string
   initialTitle: string
@@ -117,25 +115,25 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
   return (
     <div 
       onClick={handleWrapperClick}
-      className={styles.editorShell}
+      className="flex flex-col bg-white py-8 px-8 pb-24 cursor-text"
     >
       {/* Save indicator overlay or header label */}
-      <div className={styles.editorMetaRow}>
-        <div className={styles.editorMetaGroup}>
-          <Clock className={styles.editorMetaIcon} />
+      <div className="flex items-center justify-between mb-6 text-outline text-xs select-none pointer-events-none">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4" />
           <span>{getReadingTime()}</span>
         </div>
-        <div className={styles.editorMetaGroup}>
+        <div className="flex items-center gap-2">
           {saveState === 'saving' && (
-            <span className={styles.editorSaving}>Saving...</span>
+            <span className="text-primary animate-pulse">Saving...</span>
           )}
           {saveState === 'saved' && (
-            <span className={styles.editorSaved}>
-              <Check className={styles.editorMetaIcon} /> Saved
+            <span className="flex items-center gap-1 text-secondary">
+              <Check className="w-4 h-4" /> Saved
             </span>
           )}
           {saveState === 'error' && (
-            <span className={styles.editorError}>Save failed</span>
+            <span className="text-error">Save failed</span>
           )}
         </div>
       </div>
@@ -146,13 +144,13 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
         value={title}
         onChange={handleTitleChange}
         placeholder="Untitled Note"
-        className={styles.editorTitle}
+        className="w-full mb-4 border-0 outline-none bg-transparent text-on-surface font-headline-lg text-4xl font-bold placeholder:text-outline-variant"
       />
 
       {/* Editor Content */}
       <div 
         onClick={() => editor?.commands.focus()}
-        className={styles.editorContentShell}
+        className="min-h-[400px] cursor-text"
       >
         <EditorContent 
           editor={editor} 

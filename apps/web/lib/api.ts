@@ -151,7 +151,7 @@ export const api = {
   },
   profiles: {
     me: () => apiCall<Profile>('/api/v1/profiles/me'),
-    update: (data: { daily_review_limit?: number; email_notifications_enabled?: boolean; display_name?: string }) =>
+    update: (data: Partial<Profile>) =>
       apiCall<Profile>('/api/v1/profiles/me', {
         method: 'PATCH',
         body: JSON.stringify(data),
