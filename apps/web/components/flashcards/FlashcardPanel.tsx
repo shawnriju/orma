@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { Sparkles, Trash2, CheckCircle2, AlertCircle, Loader2, X, Plus, ChevronDown, ChevronUp, CheckSquare, Square } from 'lucide-react'
 import { api } from '../../lib/api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import styles from './flashcards.module.css'
 
 interface FlashcardPanelProps {
   noteId: string
@@ -25,27 +26,7 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
   const [errorMsg, setErrorMsg] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [mode, setMode] = useState<'choose' | 'custom' | 'ai'>('choose')
-  const [mounted, setMounted] = useState(false)
-  const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const dragStateRef = React.useRef({ offsetX: 0, offsetY: 0 })
   const autoCloseTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isOpen || typeof window === 'undefined') return
-
-    const modalWidth = Math.min(window.innerWidth - 32, 840)
-    const modalHeight = Math.min(window.innerHeight - 32, 680)
-
-    setModalPosition({
-      x: Math.max(16, window.innerWidth - modalWidth - 72),
-      y: Math.max(96, window.innerHeight - modalHeight - 72),
-    })
-  }, [isOpen])
 
   useEffect(() => {
     return () => {
@@ -126,8 +107,8 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
         setSuccessMsg('')
       }
     },
-    onError: (err: any) => {
-      setErrorMsg(err.message || 'Failed to generate flashcards.')
+    onError: (err: unknown) => {
+      setErrorMsg(getErrorMessage(err, 'Failed to generate flashcards.'))
     }
   })
 
@@ -151,8 +132,8 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
         autoCloseTimerRef.current = null
       }, 1500)
     },
-    onError: (err: any) => {
-      setErrorMsg(err.message || 'Failed to save flashcards.')
+    onError: (err: unknown) => {
+      setErrorMsg(getErrorMessage(err, 'Failed to save flashcards.'))
     }
   })
 
@@ -247,39 +228,10 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
 
   const hasUnsavedDrafts = draftCards.length > 0 && mode === 'custom'
 
-  const handleDragStart = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!isOpen) return
-
-    dragStateRef.current = {
-      offsetX: event.clientX - modalPosition.x,
-      offsetY: event.clientY - modalPosition.y,
-    }
-    setIsDragging(true)
-    ;(event.currentTarget as HTMLDivElement).setPointerCapture(event.pointerId)
-  }
-
-  const handleDragMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return
-
-    const modalWidth = Math.min(window.innerWidth - 32, 840)
-    const modalHeight = Math.min(window.innerHeight - 32, 680)
-    const maxX = Math.max(16, window.innerWidth - modalWidth - 16)
-    const maxY = Math.max(16, window.innerHeight - 96)
-
-    setModalPosition({
-      x: Math.min(maxX, Math.max(16, event.clientX - dragStateRef.current.offsetX)),
-      y: Math.min(maxY, Math.max(0, event.clientY - dragStateRef.current.offsetY)),
-    })
-  }
-
-  const handleDragEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDragging) return
-    setIsDragging(false)
-    try {
-      ;(event.currentTarget as HTMLDivElement).releasePointerCapture(event.pointerId)
-    } catch {
-      // Pointer capture may already be released when the drag ends.
-    }
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (err instanceof Error) return err.message || fallback
+    if (typeof err === 'string') return err || fallback
+    return fallback
   }
 
   return (
@@ -287,37 +239,28 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
       <button
         type="button"
         onClick={openModal}
-        className="group fixed bottom-8 right-8 z-30 flex items-center gap-3 rounded-2xl border border-outline-variant/45 bg-surface/95 px-3.5 py-3 text-left shadow-lg shadow-primary/10 backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-xl shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-primary-container"
+        className={styles.triggerButton}
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-container text-white shadow-sm transition-transform group-hover:scale-105">
+        <span className={styles.triggerIcon}>
           <Sparkles className="h-5 w-5" />
         </span>
-        <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-semibold uppercase tracking-[0.22em] text-primary opacity-0 transition-all duration-300 group-hover:max-w-[15rem] group-hover:opacity-100 pr-1">
+        <span className={styles.triggerLabel}>
           Generate flashcards
         </span>
       </button>
 
       {mounted && isOpen && createPortal(
-        <div className="fixed inset-0 z-50 pointer-events-none">
-          <div
-            className="pointer-events-auto absolute flex max-h-[min(90vh,48rem)] w-[min(92vw,52rem)] max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-outline-variant/40 bg-surface/88 shadow-2xl shadow-primary/20 backdrop-blur-md"
-            style={{ left: modalPosition.x, top: modalPosition.y }}
-          >
-            <div className={`flex items-start justify-between border-b border-outline-variant/30 bg-gradient-to-r from-surface-container-low via-surface to-white px-6 py-5 shadow-inner ${isDragging ? 'select-none' : ''}`}>
-              <div
-                className="cursor-move pr-4"
-                onPointerDown={handleDragStart}
-                onPointerMove={handleDragMove}
-                onPointerUp={handleDragEnd}
-                onPointerLeave={handleDragEnd}
-              >
-                <div className="flex items-center gap-2 text-primary">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-container text-primary shadow-sm ring-1 ring-outline-variant">
+        <div className={styles.overlay}>
+          <div className={styles.modal}>
+            <div className={styles.header}>
+              <div className={styles.headerContent}>
+                <div className={styles.headerTitleRow}>
+                  <span className={styles.headerTitleIcon}>
                     <Sparkles className="h-4 w-4" />
                   </span>
-                  <h2 className="text-base font-semibold">Magic Study</h2>
+                  <h2 className={styles.headerTitle}>Magic Study</h2>
                 </div>
-                <p className="mt-1 text-xs text-outline">Drag this panel around to keep the note visible underneath.</p>
+                <p className={styles.headerSubtitle}>Build flashcards without leaving the note.</p>
               </div>
               <button
                 type="button"
@@ -325,15 +268,15 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
                   event.stopPropagation()
                   closeModal()
                 }}
-                className="rounded-xl p-2 text-outline transition-colors hover:bg-surface-container hover:text-on-surface-variant"
+                className={styles.iconButton}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-5">
+            <div className={styles.body}>
               {hasUnsavedDrafts && !saveMutation.isPending && (
-                <div className="mb-4 rounded-2xl border border-error-container bg-error-container px-4 py-3 text-xs font-medium text-error">
+                <div className={`${styles.bannerError} mb-4`}>
                   You have unsaved flashcards in this panel. Save them before closing if you want to keep the draft.
                 </div>
               )}
