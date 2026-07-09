@@ -26,7 +26,13 @@ export default function FlashcardPanel({ noteId, wordCount }: FlashcardPanelProp
   const [errorMsg, setErrorMsg] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const [mode, setMode] = useState<'choose' | 'custom' | 'ai'>('choose')
+  // Prevents createPortal from accessing document.body before client hydration
+  const [mounted, setMounted] = useState(false)
   const autoCloseTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     return () => {
