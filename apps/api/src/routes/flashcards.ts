@@ -2,7 +2,11 @@ import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { supabase } from '../db/client.js'
-import { generateFlashcards } from '../services/openai.js'
+// Fix #2: Import from the provider abstraction index, not a concrete implementation.
+// To switch AI backends, only services/ai/index.ts needs to change.
+import { getAIProvider } from '../services/ai/index.js'
+// Fix #6: Content utilities live in a shared lib, not in the route file.
+import { extractTextFromProseMirror } from '../lib/content.js'
 
 type Env = {
   Variables: {
@@ -51,26 +55,18 @@ flashcards.get('/count', async (c) => {
   return c.json({ count: count || 0 })
 })
 
-// Helper: extract plain text from ProseMirror JSON document
-function extractTextFromProseMirror(doc: any): string {
-  if (!doc) return ''
-  if (typeof doc === 'string') {
-    try {
-      doc = JSON.parse(doc)
-    } catch {
-      return doc
-    }
-  }
-  if (!doc?.content) return ''
-  return doc.content
-    .flatMap((node: any) => extractNodeText(node))
-    .join('\n')
-}
+// Fix #6: extractTextFromProseMirror and extractNodeText have been moved to
+// lib/content.ts and are imported at the top of this file.
 
-function extractNodeText(node: any): string[] {
-  if (node.type === 'text') return [node.text || '']
-  if (node.content) return node.content.flatMap(extractNodeText)
-  return []
+// Fix #5: Fire-and-forget helper that logs generation events for cost tracking.
+// Uses .catch() so a missing table or DB hiccup NEVER breaks the main request.
+async function logGeneration(userId: string, noteId: string): Promise<void> {
+  const { error } = await supabase
+    .from('generation_log')
+    .insert({ user_id: userId, note_id: noteId })
+  if (error) {
+    console.error('[generation_log] Failed to write log entry:', error.message)
+  }
 }
 
 // 1. POST /generate - Generate flashcards from note content or selection
@@ -109,8 +105,22 @@ flashcards.post('/generate', zValidator('json', generateSchema), async (c) => {
     return c.json({ error: 'Not enough context to generate flashcards. Please write at least 20 words.' }, 400)
   }
 
+  // Fix #3: Character limit check consolidated here in the business/route layer.
+  // The AI service no longer owns this business rule.
+  if (textToProcess.length > 10000) {
+    return c.json({ error: 'Note content is too long for AI processing. Maximum is 10,000 characters.' }, 400)
+  }
+
   try {
-    const cards = await generateFlashcards(textToProcess)
+    // Fix #2: Use the provider abstraction — route is now backend-agnostic.
+    const provider = getAIProvider()
+    const cards = await provider.generateFlashcards(textToProcess)
+
+    // Fix #5: Log generation event for cost tracking (non-blocking).
+    logGeneration(userId, note_id).catch((err: Error) =>
+      console.error('[generation_log] Unexpected error:', err.message)
+    )
+
     return c.json(cards)
   } catch (err: any) {
     return c.json({ error: err.message || 'Failed to generate flashcards' }, 500)
