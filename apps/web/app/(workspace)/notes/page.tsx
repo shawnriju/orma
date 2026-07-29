@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { FileText, Search, Plus, Sparkles, AlertCircle, MoreVertical, Edit3, Trash2 } from 'lucide-react'
 import { api, Note } from '../../../lib/api'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-
 export default function NotesPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -124,18 +123,18 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden">
+    <div className="flex-1 flex flex-col bg-white overflow-hidden px-8 py-8 gap-8 overflow-y-auto">
       {/* Header */}
-      <header className="h-16 border-b border-[#dac1b9]/30 pr-8 pl-16 flex items-center justify-between">
-        <h1 className="font-serif font-bold text-xl text-[#94492c]">My Notes</h1>
-        <div className="flex items-center gap-4 w-72 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-xl px-3 py-1.5 focus-within:border-[#d67d5c] transition-all">
-          <Search className="w-4 h-4 text-[#87736c]" />
+      <header className="flex items-center justify-between mb-8 shrink-0">
+        <h1 className="text-3xl font-bold font-headline-md text-primary">My Notes</h1>
+        <div className="flex items-center gap-2 w-72 bg-surface border border-outline-variant/40 rounded-xl py-2 px-4 focus-within:border-primary-container transition-colors">
+          <Search className="w-5 h-5 text-outline" />
           <input
             type="text"
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-xs outline-none text-[#1e1b18] w-full"
+            className="w-full bg-transparent border-0 outline-none text-sm text-on-surface placeholder:text-outline/70"
           />
         </div>
       </header>
@@ -143,28 +142,28 @@ export default function NotesPage() {
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-8">
         {isLoading ? (
-          <div className="text-sm text-[#87736c] text-center py-12">Loading notes...</div>
+          <div className="min-h-[50vh] flex items-center justify-center text-sm text-outline">Loading notes...</div>
         ) : error ? (
-          <div className="text-sm text-[#ba1a1a] text-center py-12 flex items-center justify-center gap-2">
-            <AlertCircle className="w-4 h-4" />
+          <div className="flex items-center justify-center gap-2 py-12 text-center text-error text-sm">
+            <AlertCircle className="w-5 h-5" />
             <span>Could not fetch notes. Make sure backend is running.</span>
           </div>
         ) : filteredNotes.length === 0 ? (
-          <div className="max-w-md mx-auto text-center py-20 flex flex-col items-center gap-4">
-            <div className="w-16 h-16 bg-[#f5ece7] rounded-3xl flex items-center justify-center text-[#94492c]">
-              <FileText className="w-8 h-8" />
+          <div className="max-w-md mx-auto py-20 flex flex-col items-center gap-4 text-center">
+            <div className="w-12 h-12 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-center justify-center text-outline-variant mx-auto mb-4">
+              <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg text-[#1e1b18]">No notes found</h3>
-              <p className="text-sm text-[#87736c] mt-1 leading-relaxed">
+              <h3 className="text-lg font-semibold text-on-surface">No notes found</h3>
+              <p className="text-sm leading-relaxed text-outline">
                 Create your first note to start writing, planning, and studying.
               </p>
             </div>
             <button
               onClick={handleCreateNote}
-              className="mt-4 px-8 py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white text-base font-bold rounded-2xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 flex items-center gap-2 group"
+              className="inline-flex items-center justify-center px-6 py-2.5 bg-primary-container text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-primary transition-all active:scale-95 cursor-pointer"
             >
-              <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+              <Plus className="w-5 h-5" />
               <span>Create Your First Note</span>
             </button>
           </div>
@@ -174,34 +173,34 @@ export default function NotesPage() {
               <div
                 key={note.id}
                 onClick={() => router.push(`/notes/${note.id}`)}
-                className="p-6 bg-[#fff8f5] border border-[#dac1b9]/30 rounded-3xl hover:border-[#d67d5c] hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between gap-4 group relative"
+                className="relative flex flex-col justify-between gap-4 p-5 bg-surface border border-outline-variant/30 rounded-2xl cursor-pointer hover:border-primary-container hover:shadow-sm hover:-translate-y-px transition-all group"
               >
                 <div>
                   <div className="flex justify-between items-start">
-                    <h3 className="font-semibold text-base text-[#1e1b18] group-hover:text-[#94492c] transition-colors line-clamp-1 pr-6 flex-1">
+                    <h3 className={`${"pr-6 text-base font-semibold text-on-surface leading-snug group-hover:text-primary"} ${"group-hover:text-primary"}`}>
                       {note.title || 'Untitled Note'}
                     </h3>
-                    <div className="absolute top-5 right-5 z-10">
+                    <div className="absolute top-4 right-4 z-10">
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           setActiveMenuNoteId(activeMenuNoteId === note.id ? null : note.id)
                         }}
-                        className="p-1 hover:bg-[#f5ece7] rounded-lg transition-all text-[#87736c] hover:text-[#94492c]"
+                        className="p-1 rounded-lg text-outline hover:bg-surface-container hover:text-primary transition-colors"
                       >
-                        <MoreVertical className="w-4 h-4" />
+                        <MoreVertical className="w-5 h-5" />
                       </button>
                       {activeMenuNoteId === note.id && (
-                        <div className="absolute right-0 mt-1 w-36 bg-white border border-[#dac1b9]/40 rounded-xl shadow-lg py-1 text-xs text-[#54433d] z-20">
+                        <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-outline-variant/40 rounded-xl shadow-lg py-1 z-20">
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
                               setActiveMenuNoteId(null)
                               handleRename(note.id, note.title)
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-[#fff8f5] hover:text-[#94492c] flex items-center gap-2"
+                            className="w-full flex items-center gap-2 py-2 px-4 text-left text-xs transition-colors hover:bg-surface hover:text-primary"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
+                            <Edit3 className="w-5 h-5" />
                             <span>Rename</span>
                           </button>
                           <button
@@ -210,20 +209,20 @@ export default function NotesPage() {
                               setActiveMenuNoteId(null)
                               handleDelete(note.id)
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-[#ffdad6]/30 text-[#ba1a1a] flex items-center gap-2"
+                            className={`${"w-full flex items-center gap-2 py-2 px-4 text-left text-xs transition-colors hover:bg-surface hover:text-primary"} ${"text-error hover:bg-error-container/30"}`}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-5 h-5" />
                             <span>Delete</span>
                           </button>
                         </div>
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-[#87736c] mt-2 line-clamp-3 leading-relaxed">
+                  <p className="mt-2 text-xs leading-relaxed text-outline line-clamp-3">
                     {getNotePreview(note.content)}
                   </p>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-[#dac1b9]/20 text-[11px] text-[#87736c] font-medium">
+                <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20 text-[11px] font-medium text-outline">
                   <span>{note.word_count || 0} words</span>
                   <span>{note.updated_at ? new Date(note.updated_at).toLocaleDateString() : ''}</span>
                 </div>

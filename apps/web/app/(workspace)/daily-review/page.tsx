@@ -7,7 +7,6 @@ import { api, Flashcard } from '../../../lib/api'
 import { previewIntervals, Rating } from '../../../lib/sm2'
 import EditFlashcardModal from '../../../components/flashcards/EditFlashcardModal'
 import { useQueryClient } from '@tanstack/react-query'
-
 type PageState = 'loading' | 'start' | 'empty' | 'reviewing' | 'complete'
 
 export default function DailyReviewPage() {
@@ -18,6 +17,8 @@ export default function DailyReviewPage() {
   const [queue, setQueue] = useState<Flashcard[]>([])
   const [isOvertime, setIsOvertime] = useState(false)
   const [showOvertimeWarning, setShowOvertimeWarning] = useState(false)
+  const [showExitModal, setShowExitModal] = useState(false)
+  const [pendingExitUrl, setPendingExitUrl] = useState<string | null>(null)
   
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
@@ -118,36 +119,36 @@ export default function DailyReviewPage() {
 
   if (pageState === 'loading') {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0 justify-center items-center">
-        <Loader2 className="w-8 h-8 text-[#d67d5c] animate-spin" />
-        <div className="text-center py-4 text-sm text-[#87736c]">Loading your daily review...</div>
+      <div className="min-h-[50vh] flex items-center justify-center text-sm text-outline">
+        <Loader2 className="w-5 h-5" />
+        <div className="text-sm leading-relaxed text-outline">Loading your daily review...</div>
       </div>
     )
   }
 
   if (pageState === 'start') {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0">
+      <div className="flex-1 flex flex-col bg-white overflow-y-auto p-4 md:p-8">
         <header className="mb-8">
-          <h1 className="font-serif font-bold text-3xl text-[#94492c]">Daily Review</h1>
-          <p className="text-sm text-[#87736c] mt-1">Strengthen your memory with spaced repetition</p>
+          <h1 className="text-3xl font-bold font-headline-md text-primary">Daily Review</h1>
+          <p className="text-sm leading-relaxed text-outline">Strengthen your memory with spaced repetition</p>
         </header>
-        <div className="flex-1 flex items-center justify-center py-12">
-           <div className="bg-[#fff8f5] border border-[#dac1b9]/40 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6 max-w-2xl w-full">
-            <div className="w-16 h-16 bg-[#d67d5c] rounded-3xl flex items-center justify-center text-[#fff]">
-              <Clock className="w-8 h-8" />
+        <div className="flex-1 flex items-center justify-center p-8">
+           <div className="w-full max-w-3xl bg-surface border border-outline-variant/40 rounded-[2.5rem] p-8 shadow-sm text-center flex flex-col items-center gap-6">
+            <div className="w-12 h-12 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-center justify-center text-outline-variant mx-auto mb-4">
+              <Clock className="w-5 h-5" />
             </div>
 
             <div>
-              <h2 className="font-serif font-bold text-2xl text-[#1e1b18]">Ready to study?</h2>
-              <p className="text-sm text-[#87736c] mt-2 leading-relaxed max-w-md">
+              <h2 className="text-lg font-semibold text-on-surface">Ready to study?</h2>
+              <p className="text-sm leading-relaxed text-outline">
                 Out of the total {totalCards} cards created, these are the {queue.length} selected for your daily review session.
               </p>
             </div>
 
             <button
               onClick={() => setPageState('reviewing')}
-              className="mt-4 w-full py-4 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm flex justify-center items-center gap-2"
+              className="inline-flex items-center justify-center px-6 py-2.5 bg-primary-container text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-primary transition-all active:scale-95 cursor-pointer"
             >
               Start Daily Review
             </button>
@@ -159,20 +160,20 @@ export default function DailyReviewPage() {
 
   if (pageState === 'empty') {
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0">
+      <div className="flex-1 flex flex-col bg-white overflow-y-auto p-4 md:p-8">
         <header className="mb-8">
-          <h1 className="font-serif font-bold text-3xl text-[#94492c]">Daily Review</h1>
-          <p className="text-sm text-[#87736c] mt-1">Strengthen your memory with spaced repetition</p>
+          <h1 className="text-3xl font-bold font-headline-md text-primary">Daily Review</h1>
+          <p className="text-sm leading-relaxed text-outline">Strengthen your memory with spaced repetition</p>
         </header>
-        <div className="flex-1 flex items-center justify-center py-12">
-           <div className="bg-[#fff8f5] border border-[#dac1b9]/40 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6 max-w-2xl w-full">
-            <div className="w-16 h-16 bg-[#d3e8d1] rounded-3xl flex items-center justify-center text-[#0e1f11]">
-              <CheckCircle2 className="w-8 h-8" />
+        <div className="flex-1 flex items-center justify-center p-8">
+           <div className="w-full max-w-3xl bg-surface border border-outline-variant/40 rounded-[2.5rem] p-8 shadow-sm text-center flex flex-col items-center gap-6">
+            <div className="w-12 h-12 rounded-xl bg-secondary-container/30 border border-secondary/20 flex items-center justify-center text-secondary mx-auto mb-4">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
 
             <div>
-              <h2 className="font-serif font-bold text-2xl text-[#1e1b18]">You're all caught up ✓</h2>
-              <p className="text-sm text-[#87736c] mt-2 leading-relaxed">
+              <h2 className="text-lg font-semibold text-on-surface">You're all caught up ✓</h2>
+              <p className="text-sm leading-relaxed text-outline">
                 You have 0 cards due for today.
               </p>
             </div>
@@ -180,13 +181,13 @@ export default function DailyReviewPage() {
             <div className="flex flex-col gap-3 w-full mt-4 max-w-sm mx-auto">
               <button
                 onClick={() => setShowOvertimeWarning(true)}
-                className="w-full py-3.5 bg-[#f5ece7] hover:bg-[#e1d8d4] text-[#54433d] font-semibold rounded-2xl transition-all shadow-sm flex items-center justify-center"
+                className="inline-flex items-center justify-center px-6 py-2.5 bg-white text-on-surface text-sm font-semibold rounded-xl border border-outline-variant hover:bg-surface-container-low transition-all active:scale-95 cursor-pointer"
               >
                 Study More (Overtime)
               </button>
               <button
                 onClick={() => router.push('/study')}
-                className="w-full py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm"
+                className="inline-flex items-center justify-center px-6 py-2.5 bg-primary-container text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-primary transition-all active:scale-95 cursor-pointer"
               >
                 Free Study →
               </button>
@@ -196,18 +197,18 @@ export default function DailyReviewPage() {
 
         {/* Overtime Confirmation Modal */}
         {showOvertimeWarning && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="max-w-sm w-full bg-white rounded-[2rem] border border-[#dac1b9]/40 p-6 flex flex-col gap-4 shadow-xl text-center">
+          <div className="fixed inset-0 z-50 bg-on-background/20 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white border border-outline-variant/30 rounded-3xl p-8 shadow-xl flex flex-col gap-2 text-center">
               <div>
-                <h3 className="font-serif font-bold text-lg text-[#1e1b18]">Start Overtime Session?</h3>
-                <p className="text-xs text-[#87736c] mt-2 leading-relaxed">
+                <h3 className="text-xl font-semibold text-on-surface">Start Overtime Session?</h3>
+                <p className="text-sm text-outline leading-relaxed mb-6">
                   You have completed your daily review. Further attempts will fetch future cards and affect their scheduling. Are you sure you want to proceed?
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <button
                   onClick={() => setShowOvertimeWarning(false)}
-                  className="py-2.5 bg-[#f5ece7] text-[#87736c] hover:bg-[#e1d8d4] font-semibold rounded-xl text-xs transition-all"
+                  className="inline-flex items-center justify-center px-6 py-2.5 bg-white text-on-surface text-sm font-semibold rounded-xl border border-outline-variant hover:bg-surface-container-low transition-all active:scale-95 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -216,7 +217,7 @@ export default function DailyReviewPage() {
                     setShowOvertimeWarning(false)
                     setIsOvertime(true)
                   }}
-                  className="py-2.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-xl text-xs transition-all"
+                  className="inline-flex items-center justify-center px-6 py-2.5 bg-primary-container text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-primary transition-all active:scale-95 cursor-pointer"
                 >
                   Proceed
                 </button>
@@ -232,64 +233,61 @@ export default function DailyReviewPage() {
     const total = sessionStats.hard + sessionStats.ok + sessionStats.easy
     const accuracy = total > 0 ? Math.round(((sessionStats.ok + sessionStats.easy) / total) * 100) : 0
     return (
-      <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-8 md:p-12 min-h-0 relative justify-center items-center">
-         <div className="max-w-md w-full bg-[#fff8f5] border border-[#dac1b9]/40 rounded-[2.5rem] p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6">
+      <div className="flex-1 flex flex-col items-center justify-center bg-white overflow-y-auto p-4 md:p-8">
+         <div className="w-full max-w-md bg-surface border border-outline-variant/40 rounded-[2.5rem] p-8 shadow-sm text-center flex flex-col items-center gap-6">
             {streakCount > 0 && (
-              <div className="bg-[#fff3e0] text-[#e65100] text-sm font-bold px-4 py-1.5 rounded-full border border-[#ffe0b2] shadow-sm mb-2">
+              <div className="inline-flex items-center py-1.5 px-4 rounded-full bg-orange-100 text-orange-800 border border-orange-200 text-sm font-bold">
                 🔥 {streakCount}-day streak
               </div>
             )}
             
-            <div className="w-20 h-20 bg-[#d3e8d1] rounded-full flex items-center justify-center text-[#0e1f11]">
-              <CheckCircle2 className="w-10 h-10 text-[#506351]" />
+            <div className="w-12 h-12 rounded-xl bg-secondary-container/30 border border-secondary/20 flex items-center justify-center text-secondary mx-auto mb-4">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
 
             <div>
-              <h2 className="font-serif font-bold text-3xl text-[#1e1b18]">Great job!</h2>
-              <p className="text-sm text-[#87736c] mt-2 leading-relaxed">
+              <h2 className="text-3xl font-bold font-headline-md text-primary">Great job!</h2>
+              <p className="text-sm leading-relaxed text-outline">
                 You finished your daily study session.
               </p>
-              <div className="mt-2 inline-block bg-[#f5ece7] px-3 py-1 rounded-full text-xs font-semibold text-[#54433d] border border-[#dac1b9]/30">
+              <div className="inline-flex items-center gap-1.5 py-1 px-3 bg-surface border border-outline-variant/40 rounded-full text-xs font-semibold text-primary mt-2">
                 {totalCards} total cards saved
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 w-full mt-2">
-              <div className="bg-[#fff] border border-[#dac1b9]/20 rounded-2xl p-3">
-                <div className="text-lg font-bold text-[#ba1a1a]">{sessionStats.hard}</div>
-                <div className="text-[10px] text-[#87736c] font-medium uppercase tracking-wider mt-1">Hard</div>
+            <div className="w-full grid grid-cols-3 gap-3">
+              <div className="bg-white border border-outline-variant/20 rounded-2xl p-3 flex flex-col items-center gap-1">
+                <div className="text-lg font-bold text-error">{sessionStats.hard}</div>
+                <div className="text-[10px] text-outline font-medium uppercase tracking-wider mt-1">Hard</div>
               </div>
-              <div className="bg-[#fff] border border-[#dac1b9]/20 rounded-2xl p-3">
+              <div className="bg-white border border-outline-variant/20 rounded-2xl p-3 flex flex-col items-center gap-1">
                 <div className="text-lg font-bold text-[#f59e0b]">{sessionStats.ok}</div>
-                <div className="text-[10px] text-[#87736c] font-medium uppercase tracking-wider mt-1">OK</div>
+                <div className="text-[10px] text-outline font-medium uppercase tracking-wider mt-1">OK</div>
               </div>
-              <div className="bg-[#fff] border border-[#dac1b9]/20 rounded-2xl p-3">
-                <div className="text-lg font-bold text-[#506351]">{sessionStats.easy}</div>
-                <div className="text-[10px] text-[#87736c] font-medium uppercase tracking-wider mt-1">Easy</div>
+              <div className="bg-white border border-outline-variant/20 rounded-2xl p-3 flex flex-col items-center gap-1">
+                <div className="text-lg font-bold text-secondary">{sessionStats.easy}</div>
+                <div className="text-[10px] text-outline font-medium uppercase tracking-wider mt-1">Easy</div>
               </div>
             </div>
             
             <div className="w-full text-center mt-2">
-              <span className="text-sm font-semibold text-[#87736c]">Accuracy: {accuracy}%</span>
+              <span className="text-sm font-semibold text-outline">Accuracy: {accuracy}%</span>
             </div>
 
             <div className="flex flex-col gap-3 w-full mt-4">
-              <button
-                onClick={() => fetchInitialData(isOvertime)}
-                className="w-full py-3.5 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm flex items-center justify-center"
-              >
+              <button onClick={() => fetchInitialData(isOvertime)} className="w-full inline-flex items-center justify-center px-6 py-2.5 bg-primary-container text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-primary transition-all active:scale-95 cursor-pointer">
                 Try another session
               </button>
               <div className="flex gap-3 w-full">
                 <button
                   onClick={() => router.push('/notes')}
-                  className="flex-1 py-3 bg-[#f5ece7] hover:bg-[#e1d8d4] text-[#54433d] font-semibold rounded-xl transition-all shadow-sm flex items-center justify-center text-sm"
+                  className="flex-1 inline-flex items-center justify-center px-6 py-2.5 bg-white text-on-surface text-sm font-semibold rounded-xl border border-outline-variant hover:bg-surface-container-low transition-all active:scale-95 cursor-pointer"
                 >
                   Back to notes
                 </button>
                 <button
                   onClick={() => router.push('/study')}
-                  className="flex-1 py-3 bg-[#f5ece7] hover:bg-[#e1d8d4] text-[#54433d] font-semibold rounded-xl transition-all shadow-sm flex items-center justify-center text-sm"
+                  className="flex-1 inline-flex items-center justify-center px-6 py-2.5 bg-white text-on-surface text-sm font-semibold rounded-xl border border-outline-variant hover:bg-surface-container-low transition-all active:scale-95 cursor-pointer"
                 >
                   Free Study
                 </button>
@@ -310,17 +308,17 @@ export default function DailyReviewPage() {
   const intervals = previewIntervals(cardState)
 
   return (
-    <div className="flex-1 flex flex-col bg-[#fff] h-full overflow-hidden p-6 md:p-8 min-h-0 relative">
+    <div className="flex-1 flex flex-col bg-white overflow-y-auto p-4 md:p-8">
       <header className="mb-4 flex items-center gap-4 shrink-0">
         <button
-          onClick={() => router.push('/study')}
-          className="p-2 hover:bg-[#f5ece7] text-[#87736c] hover:text-[#94492c] rounded-xl transition-all"
+          onClick={() => { setPendingExitUrl('/study'); setShowExitModal(true); }}
+          className="p-2 rounded-xl border border-outline-variant/40 text-outline hover:bg-surface-container-low transition-colors"
           title="Exit Session"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="font-serif font-bold text-2xl text-[#94492c]">Daily Review</h1>
+          <h1 className="text-3xl font-bold font-headline-md text-primary">Daily Review</h1>
         </div>
       </header>
 
@@ -328,13 +326,13 @@ export default function DailyReviewPage() {
         <div className="w-full max-w-2xl flex flex-col items-center gap-6">
           {/* Progress Indicator */}
           <div className="w-full max-w-xl">
-            <div className="flex justify-between text-xs font-semibold text-[#87736c] mb-2 uppercase tracking-wider">
+            <div className="flex justify-between text-xs font-semibold text-outline mb-2 uppercase tracking-wider">
               <span>Progress</span>
               <span>Card {currentCardIndex + 1} of {queue.length}</span>
             </div>
-            <div className="w-full h-2 bg-[#f5ece7] rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#d67d5c] transition-all duration-300"
+                className="h-full bg-primary-container transition-all duration-300"
                 style={{ width: `${((currentCardIndex) / queue.length) * 100}%` }}
               />
             </div>
@@ -346,29 +344,20 @@ export default function DailyReviewPage() {
             <div
               onClick={() => setIsFlipped(!isFlipped)}
               className="flex-1 max-w-xl aspect-[4/3] max-h-[380px] cursor-pointer"
-              style={{ perspective: '1000px' }}
+              
             >
               <div
-                className="relative w-full h-full transition-transform duration-500"
-                style={{
-                  transformStyle: 'preserve-3d',
-                  transform: isFlipped ? 'rotateY(180deg)' : 'none',
-                }}
+                className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] ${isFlipped ? "[transform:rotateY(180deg)]" : ""}`}
               >
                 {/* Front Side */}
                 <div
-                  className="absolute inset-0 w-full h-full bg-white border border-[#dac1b9]/50 rounded-[2.5rem] p-8 md:p-10 flex flex-col justify-between shadow-sm"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                  }}
+                  className="absolute inset-0 w-full h-full bg-white border border-outline-variant/50 rounded-[2.5rem] p-8 md:p-10 flex flex-col justify-between shadow-sm"
+                  
                 >
                   <div className="flex justify-between items-center gap-4">
                     {currentCard?.notes?.title && (
-                      <div
-                        className="flex items-center gap-1.5 px-3 py-1 bg-[#fff8f5] border border-[#dac1b9]/40 rounded-full font-semibold text-xs text-[#94492c] max-w-[220px] truncate shadow-sm"
-                        title="From note"
-                      >
-                        <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
+                      <div onClick={(e) => { e.stopPropagation(); if (currentCard.note_id) { setPendingExitUrl(`/notes/${currentCard.note_id}`); setShowExitModal(true); } }} className="flex items-center gap-1.5 px-3 py-1 bg-surface border border-outline-variant/40 rounded-full font-semibold text-xs text-primary max-w-[220px] truncate shadow-sm hover:bg-surface-container-low cursor-pointer transition-colors" title="Go to note">
+                        <BookOpen className="w-3 h-3 text-primary-container shrink-0" />
                         <span>From: {currentCard.notes.title}</span>
                       </div>
                     )}
@@ -378,7 +367,7 @@ export default function DailyReviewPage() {
                           e.stopPropagation()
                           setEditingCard(currentCard)
                         }}
-                        className="p-1.5 rounded-full hover:bg-[#fff8f5] border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
+                        className="p-1.5 rounded-full hover:bg-surface border border-transparent hover:border-outline-variant/40 text-outline hover:text-primary-container transition-all"
                         title="Edit Card"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -386,11 +375,11 @@ export default function DailyReviewPage() {
                     </div>
                   </div>
                   <div className="flex-1 flex items-center justify-center py-4">
-                    <p className="font-serif font-semibold text-xl md:text-2xl text-[#1e1b18] text-center leading-relaxed">
+                    <p className="text-lg md:text-xl font-semibold text-on-surface text-center leading-relaxed">
                       {currentCard?.question}
                     </p>
                   </div>
-                  <div className="text-center text-xs text-[#87736c] font-medium flex items-center justify-center gap-1.5 opacity-60">
+                  <div className="text-center text-xs text-outline font-medium flex items-center justify-center gap-1.5 opacity-60">
                     <RotateCw className="w-3.5 h-3.5" />
                     <span>Space or tap to reveal answer</span>
                   </div>
@@ -398,19 +387,12 @@ export default function DailyReviewPage() {
 
                 {/* Back Side */}
                 <div
-                  className="absolute inset-0 w-full h-full bg-[#fff8f5] border-2 border-[#d67d5c]/40 rounded-[2.5rem] p-8 md:p-10 flex flex-col justify-between shadow-sm"
-                  style={{
-                    backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)',
-                  }}
+                  className="absolute inset-0 w-full h-full bg-surface border-2 border-primary-container/40 rounded-[2.5rem] p-8 md:p-10 flex flex-col justify-between shadow-sm backface-hidden [transform:rotateY(180deg)]"
                 >
                   <div className="flex justify-between items-center gap-4">
                     {currentCard?.notes?.title && (
-                      <div
-                        className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#dac1b9]/40 rounded-full font-semibold text-xs text-[#94492c] max-w-[220px] truncate shadow-sm"
-                        title="From note"
-                      >
-                        <BookOpen className="w-3 h-3 text-[#d67d5c] shrink-0" />
+                      <div onClick={(e) => { e.stopPropagation(); if (currentCard.note_id) { setPendingExitUrl(`/notes/${currentCard.note_id}`); setShowExitModal(true); } }} className="flex items-center gap-1.5 px-3 py-1 bg-white border border-outline-variant/40 rounded-full font-semibold text-xs text-primary max-w-[220px] truncate shadow-sm hover:bg-surface-container-low cursor-pointer transition-colors" title="Go to note">
+                        <BookOpen className="w-3 h-3 text-primary-container shrink-0" />
                         <span>From: {currentCard.notes.title}</span>
                       </div>
                     )}
@@ -420,19 +402,19 @@ export default function DailyReviewPage() {
                           e.stopPropagation()
                           setEditingCard(currentCard)
                         }}
-                        className="p-1.5 rounded-full hover:bg-white border border-transparent hover:border-[#dac1b9]/40 text-[#87736c] hover:text-[#d67d5c] transition-all"
+                        className="p-1.5 rounded-full hover:bg-white border border-transparent hover:border-outline-variant/40 text-outline hover:text-primary-container transition-all"
                         title="Edit Card"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                  <div className="flex-1 flex items-center justify-center py-4 overflow-y-auto">
-                    <p className="font-medium text-lg md:text-xl text-[#54433d] text-center leading-relaxed">
+                  <div className="flex-1 flex items-center justify-center py-4 overflow-y-auto w-full">
+                    <p className="text-base md:text-lg text-on-surface leading-relaxed whitespace-pre-wrap text-center w-full">
                       {currentCard?.answer}
                     </p>
                   </div>
-                  <div className="text-center text-xs text-[#87736c] font-medium flex items-center justify-center gap-1.5 opacity-60">
+                  <div className="text-center text-xs text-outline font-medium flex items-center justify-center gap-1.5 opacity-60">
                     <RotateCw className="w-3.5 h-3.5" />
                     <span>Space or tap to flip back</span>
                   </div>
@@ -446,19 +428,19 @@ export default function DailyReviewPage() {
             {!isFlipped ? (
               <button
                 onClick={() => setIsFlipped(true)}
-                className="w-full py-4 bg-[#d67d5c] hover:bg-[#94492c] text-white font-semibold rounded-2xl transition-all shadow-sm text-sm"
+                className="w-full py-4 bg-primary-container hover:bg-primary text-white font-semibold rounded-2xl transition-all shadow-sm text-sm"
               >
                 Reveal answer
               </button>
             ) : (
               <div className="w-full flex flex-col gap-4">
-                <div className="text-center font-semibold text-[#87736c] text-sm">
+                <div className="text-center font-semibold text-outline text-sm">
                   How well did you remember this?
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4">
                   <button
                     onClick={() => handleRating('hard')}
-                    className="flex flex-col items-center py-3 bg-[#ffdad6] hover:bg-[#ffb4ab] text-[#ba1a1a] rounded-2xl transition-all shadow-sm"
+                    className="flex flex-col items-center py-3 bg-error-container hover:bg-[#ffb4ab] text-error rounded-2xl transition-all shadow-sm"
                   >
                     <span className="font-bold text-sm">Hard</span>
                     <span className="text-xs opacity-80 mt-0.5">{formatInterval(intervals.hard)}</span>
@@ -472,7 +454,7 @@ export default function DailyReviewPage() {
                   </button>
                   <button
                     onClick={() => handleRating('easy')}
-                    className="flex flex-col items-center py-3 bg-[#d3e8d1] hover:bg-[#b7ccb6] text-[#0e1f11] rounded-2xl transition-all shadow-sm"
+                    className="flex flex-col items-center py-3 bg-secondary-fixed hover:bg-[#b7ccb6] text-on-secondary-fixed rounded-2xl transition-all shadow-sm"
                   >
                     <span className="font-bold text-sm">Easy</span>
                     <span className="text-xs opacity-80 mt-0.5">{formatInterval(intervals.easy)}</span>
@@ -483,6 +465,38 @@ export default function DailyReviewPage() {
           </div>
         </div>
       </div>
+
+      
+      {/* Exit Confirmation Modal */}
+      {showExitModal && (
+        <div className="fixed inset-0 z-50 bg-on-background/20 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-outline-variant/30 rounded-3xl p-8 shadow-xl flex flex-col gap-2 text-center">
+            <div>
+              <h3 className="text-xl font-semibold text-on-surface">Exit Daily Review?</h3>
+              <p className="text-sm text-outline leading-relaxed mb-6">
+                Are you sure you want to exit your daily review? Your progress so far has been saved, but you still have cards left for today.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <button
+                onClick={() => setShowExitModal(false)}
+                className="inline-flex items-center justify-center px-6 py-2.5 bg-white text-on-surface text-sm font-semibold rounded-xl border border-outline-variant hover:bg-surface-container-low transition-all active:scale-95 cursor-pointer"
+              >
+                Stay
+              </button>
+              <button
+                onClick={() => {
+                  setShowExitModal(false)
+                  if (pendingExitUrl) router.push(pendingExitUrl)
+                }}
+                className="inline-flex items-center justify-center px-6 py-2.5 bg-error text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-error/90 transition-all active:scale-95 cursor-pointer"
+              >
+                Exit Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editingCard && (
         <EditFlashcardModal 

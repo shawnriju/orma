@@ -36,26 +36,9 @@ notes.get('/', async (c) => {
   return c.json(data)
 })
 
-// 2. GET /:id - Fetch a single note's full details (with ownership check)
-notes.get('/:id', async (c) => {
-  const userId = c.get('userId')
-  const noteId = c.req.param('id')
-
-  const { data, error } = await supabase
-    .from('notes')
-    .select('*')
-    .eq('id', noteId)
-    .eq('user_id', userId)
-    .single()
-
-  if (error || !data) {
-    return c.json({ error: 'Note not found' }, 404)
-  }
-
-  return c.json(data)
-})
-
 // 2b. GET /:id/flashcard-stats - Get total and due flashcard count for a note
+// This must be registered BEFORE /:id — Hono matches routes in order,
+// and the generic /:id pattern would greedily consume '/{id}/flashcard-stats' first.
 notes.get('/:id/flashcard-stats', async (c) => {
   const userId = c.get('userId')
   const noteId = c.req.param('id')
@@ -100,6 +83,26 @@ notes.get('/:id/flashcard-stats', async (c) => {
     dueCount: dueCount ?? 0,
   })
 })
+
+// 2. GET /:id - Fetch a single note's full details (with ownership check)
+notes.get('/:id', async (c) => {
+  const userId = c.get('userId')
+  const noteId = c.req.param('id')
+
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('id', noteId)
+    .eq('user_id', userId)
+    .single()
+
+  if (error || !data) {
+    return c.json({ error: 'Note not found' }, 404)
+  }
+
+  return c.json(data)
+})
+
 
 // Validation Schema for creating a note
 const createSchema = z.object({

@@ -9,7 +9,6 @@ import { api, Note, Flashcard } from '../../../../lib/api'
 import Editor from '../../../../components/editor/Editor'
 import FlashcardPanel from '../../../../components/flashcards/FlashcardPanel'
 import EditFlashcardModal from '../../../../components/flashcards/EditFlashcardModal'
-
 export default function NotePage() {
   const params = useParams()
   const router = useRouter()
@@ -90,7 +89,7 @@ export default function NotePage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white text-[#87736c] text-sm">
+      <div className="flex-1 flex items-center justify-center bg-white text-outline text-sm">
         Loading workspace...
       </div>
     )
@@ -99,13 +98,13 @@ export default function NotePage() {
   if (error) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-white text-center p-6 gap-4">
-        <h2 className="text-lg font-bold text-[#ba1a1a]">Note not found</h2>
-        <p className="text-sm text-[#87736c] max-w-sm">
+        <h2 className="text-lg font-bold text-error">Note not found</h2>
+        <p className="text-sm text-outline max-w-sm leading-relaxed">
           This note could not be retrieved. It may have been deleted, or you might not have permission to view it.
         </p>
         <Link 
           href="/notes" 
-          className="px-4 py-2 bg-[#d67d5c] hover:bg-[#94492c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm"
+          className="inline-flex items-center justify-center py-2 px-4 bg-primary-container text-white text-xs font-semibold rounded-xl hover:bg-primary transition-colors"
         >
           Back to Notes
         </Link>
@@ -118,20 +117,20 @@ export default function NotePage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#fff] overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
       {/* Note Workspace Top Bar Header */}
-      <header className="h-16 border-b border-[#dac1b9]/30 px-6 flex items-center justify-between bg-[#fff]">
+      <header className="h-16 flex items-center justify-between px-6 border-b border-outline-variant/30 bg-white shrink-0">
         {/* Breadcrumb Path */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <Link 
             href="/notes" 
-            className="p-1.5 hover:bg-[#f5ece7] text-[#87736c] hover:text-[#94492c] rounded-lg transition-all"
+            className="inline-flex items-center justify-center p-1.5 rounded-lg text-outline hover:bg-surface-container hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#87736c]">
+          <div className="text-xs font-semibold uppercase tracking-wider text-outline min-w-0">
             {currentNotebook ? (
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 min-w-0">
                 <span>{currentNotebook.emoji || '📁'}</span>
                 <span>{currentNotebook.title}</span>
                 <span className="opacity-50">/</span>
@@ -147,16 +146,12 @@ export default function NotePage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsCardsPanelOpen(!isCardsPanelOpen)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              isCardsPanelOpen 
-                ? 'bg-[#d67d5c] text-white shadow-sm' 
-                : 'text-[#87736c] hover:bg-[#f5ece7] hover:text-[#54433d]'
-            }`}
+            className={`${"inline-flex items-center gap-2 py-1.5 px-3 rounded-xl text-xs font-semibold transition-all"} ${isCardsPanelOpen ? "bg-primary-container text-white shadow-sm" : "text-outline hover:bg-surface-container hover:text-on-surface-variant"}`}
           >
             <Library className="w-4 h-4" />
             <span>Cards</span>
             {stats && stats.totalCount > 0 && (
-              <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isCardsPanelOpen ? 'bg-white text-[#d67d5c]' : 'bg-[#d67d5c] text-white'}`}>
+              <span className={isCardsPanelOpen ? "py-0.5 px-1.5 rounded-full bg-white text-primary-container text-[10px]" : "py-0.5 px-1.5 rounded-full bg-primary-container text-white text-[10px]"}>
                 {stats.totalCount}
               </span>
             )}
@@ -166,7 +161,7 @@ export default function NotePage() {
           
           <button
             onClick={handleDelete}
-            className="p-1.5 hover:bg-[#ffdad6]/50 text-[#ba1a1a] hover:text-[#93000a] rounded-lg transition-all"
+            className="inline-flex items-center justify-center p-1.5 rounded-lg text-error hover:bg-error-container/50 hover:text-on-error-container transition-colors"
             title="Delete Note"
           >
             <Trash2 className="w-4 h-4" />
@@ -177,7 +172,7 @@ export default function NotePage() {
       {/* Main Workspace Layout */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Editor Area */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto relative">
+        <div className="flex-1 min-h-0 overflow-y-auto relative">
           <div className="flex-1 pb-24">
             <Editor 
               noteId={noteId}
@@ -191,9 +186,9 @@ export default function NotePage() {
 
         {/* Existing Flashcards Side Panel */}
         {isCardsPanelOpen && (
-          <div className="w-80 lg:w-96 shrink-0 border-l border-[#dac1b9]/30 bg-[#fff8f5]/50 flex flex-col overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#dac1b9]/30 bg-white flex items-center justify-between shrink-0">
-              <h3 className="text-sm font-bold text-[#54433d] flex items-center gap-2">
+          <div className="w-80 shrink-0 flex flex-col overflow-hidden bg-surface/50 border-l border-outline-variant/30">
+            <div className="flex items-center justify-between gap-3 py-4 px-5 border-b border-outline-variant/30 bg-white shrink-0">
+              <h3 className="flex items-center gap-2 text-sm font-bold text-on-surface-variant">
                 <Library className="w-4 h-4 text-[#d67d5c]" />
                 Generated Cards
               </h3>
@@ -201,49 +196,49 @@ export default function NotePage() {
                 {stats && stats.dueCount > 0 && (
                   <Link
                     href={`/study?noteId=${noteId}`}
-                    className="px-3 py-1 bg-[#d67d5c] hover:bg-[#94492c] text-white text-[10px] font-semibold rounded-lg transition-all shadow-sm"
+                    className="inline-flex items-center justify-center py-1 px-3 rounded-lg bg-primary-container text-white text-[10px] font-semibold hover:bg-primary transition-colors"
                   >
                     Study Due ({stats.dueCount})
                   </Link>
                 )}
                 <button 
                   onClick={() => setIsCardsPanelOpen(false)}
-                  className="p-1 hover:bg-[#f5ece7] text-[#87736c] rounded-lg transition-colors"
+                  className="inline-flex items-center justify-center p-1 rounded-lg text-outline hover:bg-surface-container transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
             
-            <div className="flex-1 overflow-y-auto px-5 py-4 pb-32">
+            <div className="flex-1 min-h-0 overflow-y-auto py-4 px-5 pb-32">
               {isLoadingFlashcards ? (
-                <div className="text-center py-8 text-xs text-[#87736c]">Loading cards...</div>
+                <div className="flex-1 flex items-center justify-center bg-white text-outline text-sm">Loading cards...</div>
               ) : !flashcards || flashcards.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto mb-3 border border-[#dac1b9]/50 shadow-sm text-[#dac1b9]">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-white border border-outline-variant/50 flex items-center justify-center text-outline-variant">
                     <Library className="w-6 h-6" />
                   </div>
-                  <p className="text-xs text-[#87736c]">No flashcards generated yet.</p>
+                  <p className="text-sm text-outline max-w-sm leading-relaxed">No flashcards generated yet.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
                   {flashcards.map((card) => (
-                    <div key={card.id} className="bg-white border border-[#dac1b9]/50 rounded-2xl p-4 flex flex-col gap-3 shadow-sm hover:border-[#d67d5c]/50 transition-colors group relative">
+                    <div key={card.id} className="relative flex flex-col gap-3 p-4 bg-white border border-outline-variant/50 rounded-2xl shadow-sm group">
                       <button 
                         onClick={() => setEditingCard(card)}
-                        className="absolute top-3 right-3 p-1.5 bg-white text-[#87736c] hover:text-[#d67d5c] hover:bg-[#fff8f5] border border-[#dac1b9]/30 hover:border-[#d67d5c]/40 rounded-lg opacity-0 group-hover:opacity-100 transition-all shadow-sm"
+                        className="absolute top-3 right-3 inline-flex items-center justify-center p-1.5 rounded-lg bg-white border border-outline-variant/30 text-outline opacity-0 transition-all hover:bg-surface hover:text-primary-container hover:border-primary-container/40 group-hover:opacity-100"
                         title="Edit Flashcard"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#87736c] mb-1 block">Question</span>
-                        <p className="text-sm font-semibold text-[#1e1b18] pr-8">{card.question}</p>
+                        <span className="block mb-1 text-[10px] font-bold uppercase tracking-wider text-outline">Question</span>
+                        <p className="pr-8 text-sm font-semibold text-on-surface leading-relaxed">{card.question}</p>
                       </div>
-                      <div className="w-full h-px bg-gradient-to-r from-transparent via-[#dac1b9]/30 to-transparent"></div>
+                      <div className="h-px bg-gradient-to-r from-transparent via-outline-variant/30 to-transparent"></div>
                       <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#87736c] mb-1 block">Answer</span>
-                        <p className="text-sm text-[#54433d]">{card.answer}</p>
+                        <span className="block mb-1 text-[10px] font-bold uppercase tracking-wider text-outline">Answer</span>
+                        <p className="text-sm text-on-surface-variant leading-relaxed">{card.answer}</p>
                       </div>
                     </div>
                   ))}
