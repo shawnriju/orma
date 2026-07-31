@@ -6,6 +6,7 @@ import { Flashcard } from '../../../../lib/api'
 import { sessionViewStyles } from './styles'
 import FlipCard from './FlipCard'
 import ExitConfirmModal from './ExitConfirmModal'
+import { useStudyKeyboardShortcuts } from '../_hooks/useStudyKeyboardShortcuts'
 
 interface StudySessionViewProps {
   activeSessionLabel: string
@@ -41,6 +42,15 @@ export default function StudySessionView({
   onConfirmExit,
 }: StudySessionViewProps) {
   const [showExitModal, setShowExitModal] = useState(false)
+
+  useStudyKeyboardShortcuts({
+    onPrev,
+    onNext,
+    onToggleFlip,
+    canGoPrev,
+    canGoNext,
+    isDisabled: showExitModal,
+  })
 
   return (
     <div className={sessionViewStyles.wrapper}>
@@ -82,9 +92,10 @@ export default function StudySessionView({
               disabled={!canGoPrev}
               onClick={onPrev}
               className={sessionViewStyles.navButtonPrev}
-              title="Previous Card"
+              title="Previous Card (←)"
             >
               <ChevronLeft className={sessionViewStyles.navIcon} />
+              <kbd className={sessionViewStyles.hotkeyBadge}>←</kbd>
             </button>
 
             <FlipCard
@@ -99,8 +110,9 @@ export default function StudySessionView({
               disabled={!canGoNext}
               onClick={onNext}
               className={sessionViewStyles.navButtonNext}
-              title="Next Card"
+              title="Next Card (→)"
             >
+              <kbd className={sessionViewStyles.hotkeyBadge}>→</kbd>
               <ChevronRight className={sessionViewStyles.navIcon} />
             </button>
           </div>
@@ -112,7 +124,8 @@ export default function StudySessionView({
                 onClick={onToggleFlip}
                 className={sessionViewStyles.showAnswerButton}
               >
-                Show Answer
+                <span>Show Answer</span>
+                <kbd className={sessionViewStyles.hotkeyBadgeDark}>Space</kbd>
               </button>
             ) : (
               <div className={sessionViewStyles.nextButtonWrap}>
@@ -122,6 +135,7 @@ export default function StudySessionView({
                 >
                   <span>{currentCardIndex >= sessionLength - 1 ? 'Finish Session' : 'Next Card'}</span>
                   <ChevronRight className={sessionViewStyles.nextIcon} />
+                  <kbd className={sessionViewStyles.hotkeyBadgeDark}>→</kbd>
                 </button>
               </div>
             )}
