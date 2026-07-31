@@ -1,36 +1,48 @@
 import React from "react";
 import Link from "next/link";
+import {
+  pageStyles,
+  headerStyles,
+  heroStyles,
+  dailyReviewStyles,
+  featuresStyles,
+  feature1Styles,
+  feature2Styles,
+  feature3Styles,
+  ctaStyles,
+  footerStyles,
+} from "./_components/styles";
 
 export default function Home() {
   return (
-    <div className="font-body-md overflow-x-hidden min-h-screen bg-surface text-on-background">
+    <div className={pageStyles.wrapper}>
       {/* Header */}
-      <header className="w-full top-0 sticky z-50 bg-surface/90 backdrop-blur-md dark:bg-on-background">
-        <nav className="flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto">
-          <div className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+      <header className={headerStyles.header}>
+        <nav className={headerStyles.nav}>
+          <div className={headerStyles.logo}>
             Orma
           </div>
-          <div className="hidden md:flex gap-8 items-center">
+          <div className={headerStyles.navLinksWrap}>
             <a
-              className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1"
+              className={headerStyles.navLinkActive}
               href="#"
             >
               Home
             </a>
             <a
-              className="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors duration-200"
+              className={headerStyles.navLinkInactive}
               href="#"
             >
               Features
             </a>
             <a
-              className="font-body-md text-body-md text-on-surface-variant dark:text-outline-variant hover:text-primary transition-colors duration-200"
+              className={headerStyles.navLinkInactive}
               href="#"
             >
               Pricing
             </a>
           </div>
-          <Link href="/notes" className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-label-md text-label-md active:scale-95 transition-transform cursor-pointer">
+          <Link href="/notes" className={headerStyles.ctaButton}>
             Start Learning
           </Link>
         </nav>
@@ -38,93 +50,93 @@ export default function Home() {
 
       <main>
         {/* Hero Section */}
-        <section className="max-w-container-max mx-auto px-gutter py-stack-lg md:pt-24 md:pb-12 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="font-display-lg text-display-lg text-on-surface mb-6 leading-tight">
+        <section className={heroStyles.section}>
+          <div className={heroStyles.inner}>
+            <h1 className={heroStyles.heading}>
               Learning that feels like home.
             </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">
+            <p className={heroStyles.subtext}>
               Write notes, and we’ll handle the rest. No complex setups, just you and your curiosity.
             </p>
-            <Link href="/notes" className="inline-block bg-primary-container text-on-primary-container px-10 py-4 rounded-xl font-label-md text-[18px] hover:opacity-90 transition-all active:scale-95 cursor-pointer">
+            <Link href="/notes" className={heroStyles.ctaButton}>
               Start Learning
             </Link>
           </div>
         </section>
 
         {/* Centered Daily Review Feature Section */}
-        <section className="max-w-container-max mx-auto px-gutter pb-stack-lg">
-          <div className="relative bg-surface-container-low rounded-[3rem] p-8 md:p-24 overflow-hidden flex flex-col items-center justify-center">
+        <section className={dailyReviewStyles.section}>
+          <div className={dailyReviewStyles.panel}>
             {/* Daily Review Card */}
-            <div className="tonal-card p-10 md:p-12 rounded-[2rem] warm-glow border-primary/10 max-w-lg w-full cursor-default relative z-10">
-              <div className="flex justify-between items-start mb-8">
-                <div className="w-14 h-14 rounded-2xl bg-secondary-container flex items-center justify-center">
-                  <span className="material-symbols-outlined text-on-secondary-container text-3xl">
+            <div className={dailyReviewStyles.card}>
+              <div className={dailyReviewStyles.cardHeaderRow}>
+                <div className={dailyReviewStyles.iconBadge}>
+                  <span className={dailyReviewStyles.iconText}>
                     auto_stories
                   </span>
                 </div>
-                <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-label-sm font-label-md">
+                <span className={dailyReviewStyles.badge}>
                   5 concepts ready
                 </span>
               </div>
-              <div className="mb-8">
-                <p className="font-label-md text-label-md text-secondary mb-2">
+              <div className={dailyReviewStyles.titleWrap}>
+                <p className={dailyReviewStyles.eyebrow}>
                   Spaced Repetition
                 </p>
-                <h3 className="font-headline-md text-headline-md text-on-surface leading-snug">
+                <h3 className={dailyReviewStyles.heading}>
                   Your Daily Review is ready to explore.
                 </h3>
               </div>
-              <p className="font-body-md text-body-lg text-on-surface-variant mb-10">
+              <p className={dailyReviewStyles.bodyText}>
                 We've curated 5 key concepts from your notes on "Renaissance Art" to reinforce today. It only takes 3 minutes.
               </p>
-              <Link href="/notes" className="inline-block w-full text-center bg-primary-container text-on-primary-container font-label-md text-lg py-4 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 cursor-pointer">
+              <Link href="/notes" className={dailyReviewStyles.ctaButton}>
                 Begin Session
               </Link>
             </div>
             {/* Decorative background elements */}
-            <div className="absolute -left-20 -bottom-20 opacity-30 pointer-events-none">
-              <div className="w-64 h-64 bg-primary-container rounded-full blur-3xl"></div>
+            <div className={dailyReviewStyles.decorLeft}>
+              <div className={dailyReviewStyles.decorLeftBlob}></div>
             </div>
-            <div className="absolute -right-20 -top-20 opacity-30 pointer-events-none">
-              <div className="w-80 h-80 bg-secondary-container rounded-full blur-3xl"></div>
+            <div className={dailyReviewStyles.decorRight}>
+              <div className={dailyReviewStyles.decorRightBlob}></div>
             </div>
           </div>
         </section>
 
         {/* Staggered "Frictionless by Design" Section */}
-        <section className="max-w-container-max mx-auto px-gutter py-stack-lg">
-          <div className="text-center mb-24">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-4">
+        <section className={featuresStyles.section}>
+          <div className={featuresStyles.headerWrap}>
+            <h2 className={featuresStyles.heading}>
               Frictionless by Design
             </h2>
-            <div className="h-1 w-20 bg-primary mx-auto rounded-full"></div>
+            <div className={featuresStyles.headingUnderline}></div>
           </div>
 
-          <div className="space-y-32">
+          <div className={featuresStyles.list}>
             {/* Feature 1: Capture Effortlessly */}
-            <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
-              <div className="w-full md:w-1/2">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined text-primary">edit_note</span>
+            <div className={featuresStyles.row}>
+              <div className={featuresStyles.textCol}>
+                <div className={featuresStyles.iconBadge}>
+                  <span className={featuresStyles.iconText}>edit_note</span>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-4">
+                <h3 className={featuresStyles.title}>
                   Capture effortlessly
                 </h3>
-                <p className="font-body-md text-body-lg text-on-surface-variant leading-relaxed">
+                <p className={featuresStyles.bodyText}>
                   Our editor is built for flow. No complicated markdown, no nested folders—just a clean slate that feels like high-quality paper. Focus on the thought, not the tool.
                 </p>
               </div>
-              <div className="w-full md:w-1/2">
-                <div className="bg-surface-container-high rounded-[2rem] p-8 aspect-video flex items-center justify-center">
-                  <div className="tonal-card w-full h-full rounded-xl p-6 space-y-4 shadow-sm overflow-hidden">
-                    <div className="h-4 w-3/4 bg-surface-container-highest/40 rounded"></div>
-                    <div className="h-4 w-full bg-surface-container-highest/20 rounded"></div>
-                    <div className="h-4 w-5/6 bg-surface-container-highest/20 rounded"></div>
-                    <div className="pt-4 border-t border-outline-variant/20">
-                      <div className="flex gap-2">
-                        <div className="h-6 w-16 bg-primary-container/20 rounded-full"></div>
-                        <div className="h-6 w-20 bg-secondary-container/20 rounded-full"></div>
+              <div className={featuresStyles.textCol}>
+                <div className={feature1Styles.visualOuter}>
+                  <div className={feature1Styles.visualCard}>
+                    <div className={feature1Styles.line1}></div>
+                    <div className={feature1Styles.line2}></div>
+                    <div className={feature1Styles.line3}></div>
+                    <div className={feature1Styles.footerDivider}>
+                      <div className={feature1Styles.tagRow}>
+                        <div className={feature1Styles.tag1}></div>
+                        <div className={feature1Styles.tag2}></div>
                       </div>
                     </div>
                   </div>
@@ -133,37 +145,37 @@ export default function Home() {
             </div>
 
             {/* Feature 2: Automated Spaced Repetition (Text Right) */}
-            <div className="flex flex-col md:flex-row-reverse items-center gap-16 md:gap-24">
-              <div className="w-full md:w-1/2">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined text-primary">update</span>
+            <div className={featuresStyles.rowReverse}>
+              <div className={featuresStyles.textCol}>
+                <div className={featuresStyles.iconBadge}>
+                  <span className={featuresStyles.iconText}>update</span>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-4">
+                <h3 className={featuresStyles.title}>
                   Automated Spaced Repetition
                 </h3>
-                <p className="font-body-md text-body-lg text-on-surface-variant leading-relaxed">
+                <p className={featuresStyles.bodyText}>
                   Orma automatically identifies key concepts and schedules reviews. Retain more with scientifically-proven learning rhythms that adapt to your pace.
                 </p>
               </div>
-              <div className="w-full md:w-1/2">
-                <div className="bg-secondary-container/30 rounded-[2rem] p-10 aspect-video flex items-center justify-center">
-                  <div className="relative">
-                    <div className="tonal-card p-6 rounded-2xl w-56 transform -rotate-4 relative z-20">
-                      <p className="text-label-sm text-secondary mb-2">Review Today</p>
-                      <h4 className="font-headline-sm text-on-surface font-semibold">Golden Ratio</h4>
-                      <div className="mt-4 flex justify-between items-center">
-                        <div className="flex -space-x-2">
-                          <div className="w-6 h-6 rounded-full bg-primary/20 border-2 border-white"></div>
-                          <div className="w-6 h-6 rounded-full bg-secondary/20 border-2 border-white"></div>
+              <div className={featuresStyles.textCol}>
+                <div className={feature2Styles.visualOuter}>
+                  <div className={feature2Styles.stackWrap}>
+                    <div className={feature2Styles.frontCard}>
+                      <p className={feature2Styles.frontCardEyebrow}>Review Today</p>
+                      <h4 className={feature2Styles.frontCardTitle}>Golden Ratio</h4>
+                      <div className={feature2Styles.frontCardFooterRow}>
+                        <div className={feature2Styles.avatarsWrap}>
+                          <div className={feature2Styles.avatar1}></div>
+                          <div className={feature2Styles.avatar2}></div>
                         </div>
-                        <span className="material-symbols-outlined text-outline text-sm">
+                        <span className={feature2Styles.trendIcon}>
                           trending_up
                         </span>
                       </div>
                     </div>
-                    <div className="absolute top-4 left-4 tonal-card p-6 rounded-2xl w-56 transform rotate-6 opacity-60 z-10">
-                      <div className="h-4 w-20 bg-surface-container rounded mb-4"></div>
-                      <div className="h-2 w-full bg-surface-container/40 rounded"></div>
+                    <div className={feature2Styles.backCard}>
+                      <div className={feature2Styles.backCardLine1}></div>
+                      <div className={feature2Styles.backCardLine2}></div>
                     </div>
                   </div>
                 </div>
@@ -171,40 +183,40 @@ export default function Home() {
             </div>
 
             {/* Feature 3: Context-Aware AI */}
-            <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
-              <div className="w-full md:w-1/2">
-                <div className="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center mb-6">
-                  <span className="material-symbols-outlined text-primary">auto_awesome</span>
+            <div className={featuresStyles.row}>
+              <div className={featuresStyles.textCol}>
+                <div className={featuresStyles.iconBadge}>
+                  <span className={featuresStyles.iconText}>auto_awesome</span>
                 </div>
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-4">
+                <h3 className={featuresStyles.title}>
                   Context-Aware AI
                 </h3>
-                <p className="font-body-md text-body-lg text-on-surface-variant leading-relaxed">
+                <p className={featuresStyles.bodyText}>
                   Our AI doesn't write for you; it thinks with you. It connects new notes to your existing library, surfacing relevant insights when you need them most.
                 </p>
               </div>
-              <div className="w-full md:w-1/2">
-                <div className="bg-primary-container/10 rounded-[2rem] p-8 aspect-video flex items-center justify-center">
-                  <div className="relative w-full max-w-xs h-40">
+              <div className={featuresStyles.textCol}>
+                <div className={feature3Styles.visualOuter}>
+                  <div className={feature3Styles.cardWrap}>
                     {/* Insight Card Detail */}
-                    <div className="absolute inset-0 tonal-card p-6 rounded-2xl flex flex-col justify-between border-primary/20 bg-surface-bright">
+                    <div className={feature3Styles.card}>
                       <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="material-symbols-outlined text-primary text-sm">
+                        <div className={feature3Styles.labelRow}>
+                          <span className={feature3Styles.labelIcon}>
                             lightbulb
                           </span>
-                          <span className="text-label-sm text-primary uppercase tracking-wider">
+                          <span className={feature3Styles.labelText}>
                             Related Insight
                           </span>
                         </div>
-                        <p className="font-label-md text-on-surface italic">
+                        <p className={feature3Styles.quoteText}>
                           "This echoes your note from March on Biomimicry in Architecture."
                         </p>
                       </div>
-                      <div className="flex gap-1">
-                        <div className="h-1 flex-1 bg-primary rounded-full"></div>
-                        <div className="h-1 flex-1 bg-primary/20 rounded-full"></div>
-                        <div className="h-1 flex-1 bg-primary/20 rounded-full"></div>
+                      <div className={feature3Styles.barsRow}>
+                        <div className={feature3Styles.barActive}></div>
+                        <div className={feature3Styles.barInactive}></div>
+                        <div className={feature3Styles.barInactive}></div>
                       </div>
                     </div>
                   </div>
@@ -215,55 +227,55 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="max-w-container-max mx-auto px-gutter py-stack-lg">
-          <div className="bg-primary text-on-primary rounded-3xl p-12 md:p-24 text-center relative overflow-hidden">
-            <div className="relative z-10">
-              <h2 className="font-display-lg text-display-lg mb-6">Ready to find your focus?</h2>
-              <p className="font-body-lg text-body-lg mb-10 opacity-90 max-w-xl mx-auto">
+        <section className={ctaStyles.section}>
+          <div className={ctaStyles.panel}>
+            <div className={ctaStyles.content}>
+              <h2 className={ctaStyles.heading}>Ready to find your focus?</h2>
+              <p className={ctaStyles.bodyText}>
                 Join 20,000+ curious minds who have turned their digital workspace into a peaceful
                 sanctuary of learning.
               </p>
-              <div className="flex flex-col md:flex-row gap-4 justify-center">
-                <button className="bg-surface text-primary px-10 py-4 rounded-xl font-label-md text-lg active:scale-95 transition-all cursor-pointer">
+              <div className={ctaStyles.buttonRow}>
+                <button className={ctaStyles.primaryButton}>
                   Get Orma Free
                 </button>
-                <button className="border border-white/30 text-white px-10 py-4 rounded-xl font-label-md text-lg hover:bg-white/10 transition-all cursor-pointer">
+                <button className={ctaStyles.secondaryButton}>
                   See how it works
                 </button>
               </div>
             </div>
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-48 -mt-48"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-container/20 rounded-full blur-3xl -ml-32 -mb-32"></div>
+            <div className={ctaStyles.decorTop}></div>
+            <div className={ctaStyles.decorBottom}></div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-stack-lg bg-surface-container dark:bg-surface-container-highest">
-        <div className="flex flex-col md:flex-row justify-between items-center px-gutter max-w-container-max mx-auto gap-8">
-          <div className="flex flex-col items-center md:items-start gap-2">
-            <div className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+      <footer className={footerStyles.footer}>
+        <div className={footerStyles.inner}>
+          <div className={footerStyles.brandCol}>
+            <div className={footerStyles.brandTitle}>
               Orma
             </div>
-            <p className="font-label-sm text-label-sm text-on-surface/80 dark:text-on-surface-variant">
+            <p className={footerStyles.copyright}>
               © 2026 Orma Learning. All rights reserved.
             </p>
           </div>
-          <div className="flex gap-gutter">
+          <div className={footerStyles.linksRow}>
             <a
-              className="font-label-sm text-label-sm text-on-surface dark:text-on-surface-variant hover:text-primary transition-colors"
+              className={footerStyles.link}
               href="#"
             >
               Community
             </a>
             <a
-              className="font-label-sm text-label-sm text-on-surface dark:text-on-surface-variant hover:text-primary transition-colors"
+              className={footerStyles.link}
               href="#"
             >
               Support
             </a>
             <a
-              className="font-label-sm text-label-sm text-on-surface dark:text-on-surface-variant hover:text-primary transition-colors"
+              className={footerStyles.link}
               href="#"
             >
               Privacy

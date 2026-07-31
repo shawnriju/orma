@@ -5,7 +5,8 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { useEditorStore } from '../../stores/editorStore'
-import { Clock, Tag, Plus, Check } from 'lucide-react'
+import { editorWrapperStyles, titleInputStyles, editorContentStyles } from './styles'
+import SaveIndicator from './SaveIndicator'
 interface EditorProps {
   noteId: string
   initialTitle: string
@@ -113,30 +114,12 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
   }
 
   return (
-    <div 
+    <div
       onClick={handleWrapperClick}
-      className="flex flex-col bg-white py-8 px-8 pb-24 cursor-text"
+      className={editorWrapperStyles.wrapper}
     >
       {/* Save indicator overlay or header label */}
-      <div className="flex items-center justify-between mb-6 text-outline text-xs select-none pointer-events-none">
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4" />
-          <span>{getReadingTime()}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {saveState === 'saving' && (
-            <span className="text-primary animate-pulse">Saving...</span>
-          )}
-          {saveState === 'saved' && (
-            <span className="flex items-center gap-1 text-secondary">
-              <Check className="w-4 h-4" /> Saved
-            </span>
-          )}
-          {saveState === 'error' && (
-            <span className="text-error">Save failed</span>
-          )}
-        </div>
-      </div>
+      <SaveIndicator readingTime={getReadingTime()} saveState={saveState} />
 
       {/* Editable Title */}
       <input
@@ -144,17 +127,17 @@ export default function Editor({ noteId, initialTitle, initialContent, onSave }:
         value={title}
         onChange={handleTitleChange}
         placeholder="Untitled Note"
-        className="w-full mb-4 border-0 outline-none bg-transparent text-on-surface font-headline-lg text-4xl font-bold placeholder:text-outline-variant"
+        className={titleInputStyles.input}
       />
 
       {/* Editor Content */}
-      <div 
+      <div
         onClick={() => editor?.commands.focus()}
-        className="min-h-[400px] cursor-text"
+        className={editorContentStyles.wrap}
       >
-        <EditorContent 
-          editor={editor} 
-          className="outline-none prose-h1:font-serif prose-h2:font-serif prose-p:font-sans"
+        <EditorContent
+          editor={editor}
+          className={editorContentStyles.content}
         />
       </div>
     </div>
